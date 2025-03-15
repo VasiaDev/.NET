@@ -1,0 +1,6 @@
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Tests\bin\Debug\net7.0\CoverletSourceRootsMapping_DispensaryApp.Tests
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Tests\obj\Debug\net7.0\DispensaryApp.Tests.csproj.AssemblyReference.cache
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Tests\obj\Debug\net7.0\DispensaryApp.Tests.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Tests\obj\Debug\net7.0\DispensaryApp.Tests.AssemblyInfoInputs.cache
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Tests\obj\Debug\net7.0\DispensaryApp.Tests.AssemblyInfo.cs
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Tests\obj\Debug\net7.0\DispensaryApp.Tests.csproj.CoreCompileInputs.cache

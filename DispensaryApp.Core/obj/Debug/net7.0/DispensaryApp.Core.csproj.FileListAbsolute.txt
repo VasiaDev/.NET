@@ -1,0 +1,12 @@
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\bin\Debug\net7.0\DispensaryApp.Core.deps.json
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\bin\Debug\net7.0\DispensaryApp.Core.dll
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\bin\Debug\net7.0\DispensaryApp.Core.pdb
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\DispensaryApp.Core.csproj.AssemblyReference.cache
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\DispensaryApp.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\DispensaryApp.Core.AssemblyInfoInputs.cache
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\DispensaryApp.Core.AssemblyInfo.cs
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\DispensaryApp.Core.csproj.CoreCompileInputs.cache
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\DispensaryApp.Core.dll
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\refint\DispensaryApp.Core.dll
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\DispensaryApp.Core.pdb
+C:\Users\Vasia\Desktop\Individual\DispensaryApp.Core\obj\Debug\net7.0\ref\DispensaryApp.Core.dll

@@ -1,0 +1,282 @@
+/* Основные цвета */
+@define-color primary-color #2196F3;
+@define-color primary-dark #1976D2;
+@define-color primary-light #BBDEFB;
+@define-color accent-color #FF4081;
+@define-color background-color #F5F5F5;
+@define-color surface-color #FFFFFF;
+@define-color text-color #212121;
+@define-color text-secondary #757575;
+@define-color divider-color #BDBDBD;
+
+/* Общие стили */
+window {
+    background-color: #f5f5f5;
+}
+
+/* TreeView стили */
+treeview {
+    background: transparent;
+    border: none;
+}
+
+treeview header {
+    background: transparent;
+    border: none;
+}
+
+treeview header button {
+    background: transparent;
+    border: none;
+}
+
+treeview column {
+    border: none;
+}
+
+treeview cell {
+    border: none;
+}
+
+treeview row {
+    border: none;
+}
+
+/* Кнопки */
+.primary-button {
+    background-color: @primary-color;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+.primary-button:hover {
+    background-color: @primary-dark;
+}
+
+.secondary-button {
+    background-color: @surface-color;
+    color: @text-color;
+    border: 1px solid @divider-color;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+.secondary-button:hover {
+    background-color: @background-color;
+}
+
+/* Состояния */
+.error {
+    color: #d32f2f;
+    background-color: #ffebee;
+    border-color: #ef9a9a;
+}
+
+.success {
+    color: #2e7d32;
+    background-color: #e8f5e9;
+    border-color: #a5d6a7;
+}
+
+/* Прокрутка */
+scrolledwindow {
+    border: none;
+}
+
+scrollbar {
+    background-color: @background-color;
+}
+
+scrollbar slider {
+    background-color: @divider-color;
+    border-radius: 4px;
+}
+
+scrollbar slider:hover {
+    background-color: alpha(@primary-color, 0.3);
+}
+
+/* ComboBox */
+combobox button {
+    background-color: @surface-color;
+    border: 1px solid @divider-color;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+combobox button:hover {
+    border-color: @primary-color;
+}
+
+/* Entry */
+entry {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+entry:focus {
+    border-color: @primary-color;
+}
+
+/* Таблицы */
+.treeview {
+    background-color: white;
+    border: 1px solid #ddd;
+}
+
+treeview:selected {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Поля ввода */
+.entry {
+    padding: 6px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: white;
+}
+
+/* Выпадающие списки */
+.combobox {
+    padding: 6px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: white;
+}
+
+/* Вкладки */
+notebook {
+    background-color: white;
+    border: none;
+}
+
+notebook tab {
+    padding: 8px 16px;
+}
+
+notebook tab:checked {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Сообщения */
+messagedialog {
+    background-color: white;
+}
+
+messagedialog .dialog-content-area {
+    padding: 16px;
+}
+
+messagedialog .dialog-action-area {
+    padding: 8px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* Сообщения об ошибках */
+.error-message {
+    background-color: #FFEBEE;
+    color: #C62828;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #EF9A9A;
+}
+
+/* Выпадающие списки */
+.combobox:focus {
+    border-color: #2196f3;
+}
+
+/* Вкладки */
+notebook:focus {
+    border-color: #2196f3;
+}
+
+/* Сообщения об успехе */
+.success-message {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #A5D6A7;
+}
+
+/* Метки */
+label {
+    color: @text-color;
+}
+
+/* Диалоги */
+dialog {
+    background-color: @surface-color;
+}
+
+dialog .dialog-content-area {
+    padding: 20px;
+}
+
+/* Панель инструментов */
+toolbar {
+    background-color: @surface-color;
+    border-bottom: 1px solid @divider-color;
+    padding: 8px;
+}
+
+/* Текстовое поле */
+textview {
+    background-color: @surface-color;
+    border-radius: 4px;
+    padding: 8px;
+    border: 1px solid @divider-color;
+}
+
+textview:focus {
+    border-color: @primary-color;
+}
+
+/* Прокрутка */
+scrollbar:focus {
+    background-color: #2196f3;
+}
+
+scrollbar slider:focus {
+    background-color: #2196f3;
+}
+
+/* Календарь */
+calendar {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+calendar:selected {
+    background-color: @primary-light;
+    color: @primary-dark;
+}
+
+/* Стили для заголовков */
+label.h1 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 16px 0;
+}
+
+/* Стили для кнопок */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    padding: 8px 16px;
+    border: none;
+}
+
+button:hover {
+    background-color: #45a049;
+} 
