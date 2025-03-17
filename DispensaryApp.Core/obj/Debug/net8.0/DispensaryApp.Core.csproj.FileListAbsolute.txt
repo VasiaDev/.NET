@@ -22,3 +22,4 @@ C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Core\obj\Debug\net8.0\Dispen
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Core\obj\Debug\net8.0\refint\DispensaryApp.Core.dll
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Core\obj\Debug\net8.0\DispensaryApp.Core.pdb
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Core\obj\Debug\net8.0\ref\DispensaryApp.Core.dll
+C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Core\obj\Debug\net8.0\DispensaryApp.Core.sourcelink.json

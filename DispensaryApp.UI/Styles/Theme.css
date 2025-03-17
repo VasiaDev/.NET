@@ -1,83 +1,311 @@
+/* Laravel-вдохновленная тема с улучшенным контрастом */
+@define-color laravel-red #FF2D20;         /* Основной акцентный цвет Laravel */
+@define-color laravel-dark #1A202C;        /* Темный фон как на сайте Laravel */
+@define-color laravel-darker #0F1319;      /* Еще более темный фон */
+@define-color laravel-light #2D3748;       /* Более светлый фон для элементов */
+@define-color laravel-lighter #4A5568;     /* Еще более светлый фон */
+@define-color laravel-gray #A0AEC0;        /* Серый цвет для неактивных элементов */
+@define-color laravel-white #FFFFFF;       /* Белый цвет для текста */
+@define-color laravel-off-white #F7FAFC;   /* Почти белый для фона панелей */
+@define-color laravel-border #4A5568;      /* Цвет границы */
+@define-color laravel-danger #E53E3E;      /* Цвет ошибки */
+@define-color laravel-success #38A169;     /* Цвет успеха */
+@define-color laravel-warning #ECC94B;     /* Цвет предупреждения */
+@define-color laravel-info #4299E1;        /* Цвет информации */
+
+/* Дополнительная палитра для меню */
+@define-color menu-item-1 #805AD5;         /* Фиолетовый */
+@define-color menu-item-2 #3182CE;         /* Синий */
+@define-color menu-item-3 #38A169;         /* Зеленый */
+@define-color menu-item-4 #D69E2E;         /* Желтый */
+@define-color menu-item-5 #E53E3E;         /* Красный */
+
 /* Основные цвета */
-@define-color primary-color #2196F3;
-@define-color primary-dark #1976D2;
-@define-color primary-light #BBDEFB;
-@define-color accent-color #FF4081;
-@define-color background-color #F5F5F5;
-@define-color surface-color #FFFFFF;
-@define-color text-color #212121;
-@define-color text-secondary #757575;
-@define-color divider-color #BDBDBD;
+@define-color primary-color @laravel-red;
+@define-color primary-dark #D81F12;              /* Темнее основного красного */
+@define-color primary-light alpha(@laravel-red, 0.2);
+@define-color accent-color @laravel-info;
+@define-color background-color @laravel-dark;
+@define-color surface-color @laravel-light;
+@define-color error-color @laravel-danger;
+@define-color success-color @laravel-success;
+@define-color warning-color @laravel-warning;
+@define-color text-primary @laravel-white;
+@define-color text-secondary @laravel-gray;
+@define-color outline @laravel-border;
+@define-color divider @laravel-border;
 
 /* Общие стили */
 window {
-    background-color: #f5f5f5;
+    background-color: @background-color;
+    color: @text-primary;
 }
 
-/* TreeView стили */
-treeview {
-    background: transparent;
-    border: none;
-}
-
-treeview header {
-    background: transparent;
-    border: none;
-}
-
-treeview header button {
-    background: transparent;
-    border: none;
-}
-
-treeview column {
-    border: none;
-}
-
-treeview cell {
-    border: none;
-}
-
-treeview row {
-    border: none;
-}
-
-/* Кнопки */
-.primary-button {
+/* Кнопки основные с улучшенным контрастом */
+.primary-button, button.primary-button {
     background-color: @primary-color;
-    color: white;
+    color: @laravel-white;
     border: none;
-    padding: 8px 16px;
     border-radius: 4px;
+    padding: 10px 18px;
+    font-weight: 600;
+    min-height: 38px;
+    margin: 6px;
+    /* Добавим внутреннюю тень для лучшего контраста */
+    background-image: linear-gradient(to bottom, alpha(#fff, 0.1), alpha(#000, 0.05));
 }
 
-.primary-button:hover {
+.primary-button:hover, button.primary-button:hover {
     background-color: @primary-dark;
 }
 
-.secondary-button {
-    background-color: @surface-color;
-    color: @text-color;
-    border: 1px solid @divider-color;
-    padding: 8px 16px;
+/* Кнопки вторичные с улучшенным контрастом */
+.secondary-button, button.secondary-button {
+    background-color: @laravel-lighter;
+    color: @laravel-white;
+    border: 1px solid @laravel-border;
     border-radius: 4px;
+    padding: 10px 18px;
+    font-weight: 500;
+    min-height: 38px;
+    margin: 6px;
+    background-image: linear-gradient(to bottom, alpha(#fff, 0.05), alpha(#000, 0.1));
 }
 
-.secondary-button:hover {
-    background-color: @background-color;
+.secondary-button:hover, button.secondary-button:hover {
+    background-color: @laravel-light;
+    border-color: @primary-color;
 }
 
-/* Состояния */
-.error {
-    color: #d32f2f;
-    background-color: #ffebee;
-    border-color: #ef9a9a;
+/* Обычные кнопки с улучшенным контрастом */
+button {
+    background-color: @laravel-light;
+    color: @laravel-white;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    padding: 8px 14px;
+    font-weight: 500;
+    font-size: 14px;
+    background-image: linear-gradient(to bottom, alpha(#fff, 0.05), alpha(#000, 0.1));
 }
 
-.success {
-    color: #2e7d32;
-    background-color: #e8f5e9;
-    border-color: #a5d6a7;
+button:hover {
+    background-color: @laravel-lighter;
+    border-color: @primary-color;
+}
+
+/* TreeView - современные таблицы */
+treeview {
+    background-color: @laravel-light;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    color: @text-primary;
+}
+
+treeview header {
+    background-color: @laravel-darker;
+    border-bottom: 1px solid @laravel-border;
+    min-height: 42px;
+}
+
+treeview header button {
+    padding: 10px 14px;
+    color: @laravel-white;
+    font-weight: 600;
+    background-color: transparent;
+    border: none;
+}
+
+treeview header button:hover {
+    color: @primary-color;
+}
+
+treeview row {
+    min-height: 42px;
+}
+
+treeview row:nth-child(even) {
+    background-color: alpha(@laravel-lighter, 0.15);
+}
+
+treeview row:selected {
+    background-color: alpha(@primary-color, 0.3);
+    color: @laravel-white;
+    font-weight: 500;
+}
+
+treeview cell {
+    padding: 8px 10px;
+}
+
+/* Поля ввода */
+entry {
+    background-color: @laravel-darker;
+    color: @laravel-white;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    min-height: 36px;
+}
+
+entry:focus {
+    border-color: @primary-color;
+    background-color: alpha(@laravel-dark, 0.8);
+}
+
+/* Вкладки */
+notebook {
+    background-color: @laravel-light;
+    border: none;
+    margin: 10px;
+}
+
+notebook header {
+    background-color: @laravel-darker;
+    border-bottom: 1px solid @laravel-border;
+}
+
+notebook tab {
+    padding: 12px 18px;
+    background-color: @laravel-darker;
+    margin-right: 1px;
+    color: @laravel-gray;
+    font-weight: 500;
+    min-width: 100px;
+    border-top: 2px solid transparent;
+}
+
+notebook tab:checked {
+    background-color: @laravel-light;
+    color: @laravel-white;
+    border-top: 2px solid @primary-color;
+    font-weight: 600;
+}
+
+notebook stack {
+    background-color: @laravel-light;
+    border: 1px solid @laravel-border;
+    border-top: none;
+}
+
+/* Диалоги */
+dialog {
+    background-color: @laravel-light;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    padding: 0;
+}
+
+dialog .dialog-title-bar {
+    background-color: @laravel-darker;
+    border-bottom: 1px solid @laravel-border;
+    padding: 14px 18px;
+    font-weight: 600;
+}
+
+dialog .dialog-content-area {
+    padding: 18px;
+    margin: 0;
+}
+
+dialog .dialog-action-area {
+    padding: 14px 18px;
+    margin-top: 0;
+    border-top: 1px solid @laravel-border;
+    background-color: @laravel-darker;
+}
+
+/* ComboBox */
+combobox button {
+    background-color: @laravel-light;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    padding: 10px 14px;
+    min-height: 36px;
+    color: @laravel-white;
+    background-image: linear-gradient(to bottom, alpha(#fff, 0.05), alpha(#000, 0.1));
+}
+
+combobox button:hover {
+    border-color: @primary-color;
+}
+
+combobox menu {
+    background-color: @laravel-dark;
+    border: 1px solid @laravel-border;
+    border-radius: 0 0 4px 4px;
+}
+
+combobox menu menuitem {
+    padding: 10px 14px;
+    color: @laravel-white;
+}
+
+combobox menu menuitem:hover {
+    background-color: alpha(@primary-color, 0.2);
+    color: @laravel-white;
+}
+
+/* Метки */
+label {
+    color: @laravel-white;
+    margin: 3px 0;
+    font-size: 14px;
+}
+
+label.title {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 14px 0;
+    color: @laravel-white;
+}
+
+label.subtitle {
+    font-size: 16px;
+    color: @laravel-gray;
+    margin: 6px 0;
+}
+
+/* Информационные сообщения */
+.info-message {
+    background-color: alpha(@laravel-info, 0.2);
+    color: @laravel-white;
+    padding: 14px;
+    border-radius: 4px;
+    margin: 8px 0;
+    border: 1px solid @laravel-info;
+    font-weight: 500;
+}
+
+.error-message {
+    background-color: alpha(@error-color, 0.2);
+    color: @laravel-white;
+    padding: 14px;
+    border-radius: 4px;
+    margin: 8px 0;
+    border: 1px solid @error-color;
+    font-weight: 500;
+}
+
+.success-message {
+    background-color: alpha(@success-color, 0.2);
+    color: @laravel-white;
+    padding: 14px;
+    border-radius: 4px;
+    margin: 8px 0;
+    border: 1px solid @success-color;
+    font-weight: 500;
+}
+
+.warning-message {
+    background-color: alpha(@warning-color, 0.2);
+    color: @laravel-white;
+    padding: 14px;
+    border-radius: 4px;
+    margin: 8px 0;
+    border: 1px solid @warning-color;
+    font-weight: 500;
 }
 
 /* Прокрутка */
@@ -86,197 +314,279 @@ scrolledwindow {
 }
 
 scrollbar {
-    background-color: @background-color;
+    background-color: @laravel-darker;
 }
 
 scrollbar slider {
-    background-color: @divider-color;
-    border-radius: 4px;
+    background-color: @laravel-lighter;
+    border-radius: 2px;
+    min-width: 8px;
+    min-height: 8px;
 }
 
 scrollbar slider:hover {
-    background-color: alpha(@primary-color, 0.3);
+    background-color: @primary-color;
 }
 
-/* ComboBox */
-combobox button {
-    background-color: @surface-color;
-    border: 1px solid @divider-color;
+/* Календарь */
+calendar {
+    background-color: @laravel-light;
+    border: 1px solid @laravel-border;
     border-radius: 4px;
-    padding: 6px;
-}
-
-combobox button:hover {
-    border-color: @primary-color;
-}
-
-/* Entry */
-entry {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 4px 8px;
-}
-
-entry:focus {
-    border-color: @primary-color;
-}
-
-/* Таблицы */
-.treeview {
-    background-color: white;
-    border: 1px solid #ddd;
-}
-
-treeview:selected {
-    background-color: #4CAF50;
-    color: white;
-}
-
-/* Поля ввода */
-.entry {
-    padding: 6px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    background-color: white;
-}
-
-/* Выпадающие списки */
-.combobox {
-    padding: 6px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    background-color: white;
-}
-
-/* Вкладки */
-notebook {
-    background-color: white;
-    border: none;
-}
-
-notebook tab {
-    padding: 8px 16px;
-}
-
-notebook tab:checked {
-    background-color: #4CAF50;
-    color: white;
-}
-
-/* Сообщения */
-messagedialog {
-    background-color: white;
-}
-
-messagedialog .dialog-content-area {
-    padding: 16px;
-}
-
-messagedialog .dialog-action-area {
     padding: 8px;
-    background-color: #f5f5f5;
-    border-top: 1px solid #e0e0e0;
+    color: @laravel-white;
 }
 
-/* Сообщения об ошибках */
-.error-message {
-    background-color: #FFEBEE;
-    color: #C62828;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #EF9A9A;
+calendar header {
+    color: @laravel-white;
+    font-weight: 600;
 }
 
-/* Выпадающие списки */
-.combobox:focus {
-    border-color: #2196f3;
-}
-
-/* Вкладки */
-notebook:focus {
-    border-color: #2196f3;
-}
-
-/* Сообщения об успехе */
-.success-message {
-    background-color: #E8F5E9;
-    color: #2E7D32;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #A5D6A7;
-}
-
-/* Метки */
-label {
-    color: @text-color;
-}
-
-/* Диалоги */
-dialog {
-    background-color: @surface-color;
-}
-
-dialog .dialog-content-area {
-    padding: 20px;
-}
-
-/* Панель инструментов */
-toolbar {
-    background-color: @surface-color;
-    border-bottom: 1px solid @divider-color;
-    padding: 8px;
+calendar:selected {
+    background-color: @primary-color;
+    color: @laravel-white;
+    border-radius: 2px;
 }
 
 /* Текстовое поле */
 textview {
-    background-color: @surface-color;
+    background-color: @laravel-darker;
+    border: 1px solid @laravel-border;
     border-radius: 4px;
-    padding: 8px;
-    border: 1px solid @divider-color;
+    padding: 10px;
+}
+
+textview text {
+    background-color: @laravel-darker;
+    color: @laravel-white;
 }
 
 textview:focus {
     border-color: @primary-color;
 }
 
-/* Прокрутка */
-scrollbar:focus {
-    background-color: #2196f3;
+/* Панель инструментов */
+toolbar {
+    background-color: @laravel-darker;
+    border-bottom: 1px solid @laravel-border;
+    padding: 10px;
 }
 
-scrollbar slider:focus {
-    background-color: #2196f3;
-}
-
-/* Календарь */
-calendar {
-    background-color: white;
-    border: 1px solid #e0e0e0;
+/* Контейнеры */
+frame {
+    border: 1px solid @laravel-border;
     border-radius: 4px;
+    padding: 10px;
+    margin: 10px;
+    background-color: @laravel-light;
 }
 
-calendar:selected {
-    background-color: @primary-light;
-    color: @primary-dark;
+frame > border {
+    margin: 10px;
 }
 
-/* Стили для заголовков */
-label.h1 {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 16px 0;
+frame > label {
+    color: @laravel-gray;
+    font-weight: 500;
 }
 
-/* Стили для кнопок */
-button {
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 4px;
-    padding: 8px 16px;
+/* Разделитель */
+separator {
+    background-color: @laravel-border;
+    min-height: 1px;
+    min-width: 1px;
+    margin: 8px 0;
+}
+
+/* Чекбоксы и радиокнопки */
+checkbutton {
+    margin: 6px;
+}
+
+checkbutton check {
+    border: 1px solid @laravel-border;
+    border-radius: 3px;
+    min-width: 18px;
+    min-height: 18px;
+    background-color: @laravel-darker;
+}
+
+checkbutton check:checked {
+    background-color: @primary-color;
+    border-color: @primary-color;
+}
+
+radiobutton {
+    margin: 6px;
+}
+
+radiobutton radio {
+    border: 1px solid @laravel-border;
+    border-radius: 50%;
+    min-width: 18px;
+    min-height: 18px;
+    background-color: @laravel-darker;
+}
+
+radiobutton radio:checked {
+    background-color: @primary-color;
+    border-color: @primary-color;
+}
+
+/* Боковая панель (если есть) с различными цветами для пунктов */
+.sidebar {
+    background-color: @laravel-darker;
+    border-right: 1px solid @laravel-border;
+    padding: 0;
+    min-width: 240px;
+}
+
+.sidebar button:nth-child(1) {
+    border-left: 3px solid @menu-item-1;
+}
+
+.sidebar button:nth-child(2) {
+    border-left: 3px solid @menu-item-2;
+}
+
+.sidebar button:nth-child(3) {
+    border-left: 3px solid @menu-item-3;
+}
+
+.sidebar button:nth-child(4) {
+    border-left: 3px solid @menu-item-4;
+}
+
+.sidebar button:nth-child(5) {
+    border-left: 3px solid @menu-item-5;
+}
+
+.sidebar button {
+    background-color: @laravel-dark;
     border: none;
+    border-radius: 0;
+    padding: 12px 16px;
+    margin: 1px 0;
+    color: @laravel-white;
+    font-weight: 500;
+    font-size: 15px;
 }
 
-button:hover {
-    background-color: #45a049;
+.sidebar button:hover {
+    background-color: @laravel-light;
+}
+
+.sidebar button.active:nth-child(1) {
+    background-color: alpha(@menu-item-1, 0.2);
+    border-left: 3px solid @menu-item-1;
+    color: @laravel-white;
+}
+
+.sidebar button.active:nth-child(2) {
+    background-color: alpha(@menu-item-2, 0.2);
+    border-left: 3px solid @menu-item-2;
+    color: @laravel-white;
+}
+
+.sidebar button.active:nth-child(3) {
+    background-color: alpha(@menu-item-3, 0.2);
+    border-left: 3px solid @menu-item-3;
+    color: @laravel-white;
+}
+
+.sidebar button.active:nth-child(4) {
+    background-color: alpha(@menu-item-4, 0.2);
+    border-left: 3px solid @menu-item-4;
+    color: @laravel-white;
+}
+
+.sidebar button.active:nth-child(5) {
+    background-color: alpha(@menu-item-5, 0.2);
+    border-left: 3px solid @menu-item-5;
+    color: @laravel-white;
+}
+
+/* Стиль для строки состояния */
+.statusbar {
+    background-color: @laravel-darker;
+    color: @laravel-gray;
+    border-top: 1px solid @laravel-border;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* Стиль для заголовков */
+.header-bar {
+    background-color: @laravel-darker;
+    color: @laravel-white;
+    border-bottom: 1px solid @laravel-border;
+    padding: 12px 16px;
+    font-weight: 600;
+}
+
+/* Стиль для поиска */
+.search-bar entry {
+    background-color: @laravel-darker;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: @laravel-white;
+}
+
+/* Стиль для подсказок */
+tooltip {
+    background-color: @laravel-light;
+    color: @laravel-white;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+/* Стиль для меню с разными оттенками */
+menu {
+    background-color: @laravel-dark;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    padding: 4px 0;
+}
+
+menuitem {
+    padding: 10px 16px;
+    color: @laravel-white;
+    font-size: 14px;
+    margin: 1px 0;
+}
+
+menuitem:nth-child(1):hover {
+    background-color: alpha(@menu-item-1, 0.2);
+}
+
+menuitem:nth-child(2):hover {
+    background-color: alpha(@menu-item-2, 0.2);
+}
+
+menuitem:nth-child(3):hover {
+    background-color: alpha(@menu-item-3, 0.2);
+}
+
+menuitem:nth-child(4):hover {
+    background-color: alpha(@menu-item-4, 0.2);
+}
+
+menuitem:nth-child(5):hover {
+    background-color: alpha(@menu-item-5, 0.2);
+}
+
+/* Стиль для кнопок с иконками */
+button.icon-button {
+    background-color: transparent;
+    border: none;
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+}
+
+button.icon-button:hover {
+    background-color: @laravel-light;
+    border-radius: 4px;
 } 

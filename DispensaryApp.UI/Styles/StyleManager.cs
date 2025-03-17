@@ -34,29 +34,10 @@ namespace DispensaryApp.UI.Styles
 
         public static void ApplyTreeViewStyle(TreeView treeView)
         {
-            var cssProvider = new CssProvider();
-            cssProvider.LoadFromData(@"
-                treeview {
-                    background-color: white;
-                    border: 1px solid #ddd;
-                }
-                treeview:selected {
-                    background-color: @primary-color;
-                    color: white;
-                }
-                treeview header {
-                    background-color: #f5f5f5;
-                    border-bottom: 1px solid #ddd;
-                }
-                treeview header button {
-                    padding: 8px;
-                    border: none;
-                    background: transparent;
-                }
-            ");
-
+            if (_cssProvider == null) return;
+            
             treeView.StyleContext.AddProvider(
-                cssProvider,
+                _cssProvider,
                 StyleProviderPriority.Application
             );
         }
@@ -79,6 +60,31 @@ namespace DispensaryApp.UI.Styles
         public static void ApplySuccessStyle(Widget widget)
         {
             widget.StyleContext.AddClass("success");
+        }
+
+        public static void ApplyTitleStyle(Label label)
+        {
+            label.StyleContext.AddClass("title");
+        }
+
+        public static void ApplySubtitleStyle(Label label)
+        {
+            label.StyleContext.AddClass("subtitle");
+        }
+
+        public static void ApplyInfoMessageStyle(Label label)
+        {
+            label.StyleContext.AddClass("info-message");
+        }
+
+        public static void ApplyErrorMessageStyle(Label label)
+        {
+            label.StyleContext.AddClass("error-message");
+        }
+
+        public static void ApplySuccessMessageStyle(Label label)
+        {
+            label.StyleContext.AddClass("success-message");
         }
     }
 } 

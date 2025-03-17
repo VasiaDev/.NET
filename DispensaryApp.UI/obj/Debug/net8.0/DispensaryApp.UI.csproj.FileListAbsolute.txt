@@ -12038,3 +12038,4 @@ C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.UI\obj\Debug\net8.0\refint\D
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.UI\obj\Debug\net8.0\DispensaryApp.UI.pdb
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.UI\obj\Debug\net8.0\DispensaryApp.UI.genruntimeconfig.cache
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.UI\obj\Debug\net8.0\ref\DispensaryApp.UI.dll
+C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.UI\obj\Debug\net8.0\DispensaryApp.UI.sourcelink.json

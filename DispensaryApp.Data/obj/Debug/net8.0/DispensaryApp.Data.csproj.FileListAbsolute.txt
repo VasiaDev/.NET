@@ -32,3 +32,4 @@ C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Data\obj\Debug\net8.0\refint
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Data\obj\Debug\net8.0\DispensaryApp.Data.pdb
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Data\obj\Debug\net8.0\DispensaryApp.Data.genruntimeconfig.cache
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Data\obj\Debug\net8.0\ref\DispensaryApp.Data.dll
+C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Data\obj\Debug\net8.0\DispensaryApp.Data.sourcelink.json
