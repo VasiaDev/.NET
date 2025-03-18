@@ -3,6 +3,7 @@ using System;
 using DispensaryApp.Core.Models;
 using DispensaryApp.Core.Services;
 using DispensaryApp.UI.Styles;
+using DispensaryApp.Data;
 
 namespace DispensaryApp.UI.Dialogs
 {
@@ -22,15 +23,26 @@ namespace DispensaryApp.UI.Dialogs
         private readonly Button _saveButton;
         private readonly Button _cancelButton;
 
-        public DoctorDialog(Window parent, Doctor? doctor = null) : base("Доктор", parent, DialogFlags.Modal)
+        public DoctorDialog(Window parent, DispensaryDbContext context, Doctor? doctor = null) : base("Доктор", parent, DialogFlags.Modal)
         {
             if (parent == null)
             {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            _doctorService = new DoctorService();
-            _doctor = doctor ?? new Doctor();
+            _doctorService = new DoctorService(context);
+            _doctor = doctor ?? new Doctor
+            {
+                LastName = "",
+                FirstName = "",
+                MiddleName = "",
+                Specialization = "",
+                LicenseNumber = "",
+                Phone = "",
+                Email = "",
+                Schedule = "",
+                HireDate = DateTime.Now
+            };
             
             var vbox = new Box(Orientation.Vertical, 6);
             

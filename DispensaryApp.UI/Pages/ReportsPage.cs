@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DispensaryApp.Core.Models;
 using DispensaryApp.Core.Services;
 using DispensaryApp.UI.Styles;
+using DispensaryApp.Data;
 
 namespace DispensaryApp.UI.Pages
 {
@@ -17,9 +18,9 @@ namespace DispensaryApp.UI.Pages
         private readonly ComboBox _reportTypeComboBox;
         private readonly ScrolledWindow _scrolledWindow;
 
-        public ReportsPage() : base(Orientation.Vertical, 0)
+        public ReportsPage(DispensaryDbContext context) : base(Orientation.Vertical, 0)
         {
-            _reportService = new ReportService();
+            _reportService = new ReportService(context);
             
             // Панель инструментов
             var toolbar = new Box(Orientation.Horizontal, 6) { MarginStart = 6, MarginEnd = 6, MarginTop = 6, MarginBottom = 6 };

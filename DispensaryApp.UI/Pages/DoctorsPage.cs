@@ -1,10 +1,11 @@
 using Gtk;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using DispensaryApp.Core.Models;
 using DispensaryApp.Core.Services;
 using DispensaryApp.UI.Dialogs;
 using DispensaryApp.UI.Styles;
+using DispensaryApp.Data;
 
 namespace DispensaryApp.UI.Pages
 {
@@ -18,9 +19,9 @@ namespace DispensaryApp.UI.Pages
         private readonly Button _deleteButton;
         private readonly ScrolledWindow _scrolledWindow;
 
-        public DoctorsPage() : base(Orientation.Vertical, 0)
+        public DoctorsPage(DispensaryDbContext context) : base(Orientation.Vertical, 0)
         {
-            _doctorService = new DoctorService();
+            _doctorService = new DoctorService(context);
             
             // Панель инструментов
             var hbox = new Box(Orientation.Horizontal, 6) { MarginStart = 6, MarginEnd = 6, MarginTop = 6, MarginBottom = 6 };
@@ -87,12 +88,12 @@ namespace DispensaryApp.UI.Pages
             LoadDoctors();
         }
 
-        private void LoadDoctors()
+        private async void LoadDoctors()
         {
             try
             {
                 _store.Clear();
-                var doctors = _doctorService.GetAllDoctors();
+                var doctors = await _doctorService.GetAllAsync();
                 
                 foreach (var doctor in doctors)
                 {
@@ -116,34 +117,34 @@ namespace DispensaryApp.UI.Pages
             }
         }
 
-        private void OnAddButtonClicked(object? sender, EventArgs e)
+        private async void OnAddButtonClicked(object? sender, EventArgs e)
         {
             if (Toplevel is Window parent)
             {
-                var dialog = new DoctorDialog(parent);
+                var dialog = new DoctorDialog(parent, _doctorService.Context);
                 if (dialog.Run() == (int)ResponseType.Accept)
                 {
-                    LoadDoctors();
+                    await Task.Run(() => LoadDoctors());
                 }
                 dialog.Destroy();
             }
         }
 
-        private void OnEditButtonClicked(object? sender, EventArgs e)
+        private async void OnEditButtonClicked(object? sender, EventArgs e)
         {
             if (_treeView.Selection.GetSelected(out TreeIter iter))
             {
                 var id = (int)_store.GetValue(iter, 0);
-                var doctor = _doctorService.GetDoctorById(id);
+                var doctor = await _doctorService.GetByIdAsync(id);
                 
                 if (doctor != null)
                 {
                     if (Toplevel is Window parent)
                     {
-                        var dialog = new DoctorDialog(parent, doctor);
+                        var dialog = new DoctorDialog(parent, _doctorService.Context, doctor);
                         if (dialog.Run() == (int)ResponseType.Accept)
                         {
-                            LoadDoctors();
+                            await Task.Run(() => LoadDoctors());
                         }
                         dialog.Destroy();
                     }
@@ -155,12 +156,12 @@ namespace DispensaryApp.UI.Pages
             }
         }
 
-        private void OnDeleteButtonClicked(object? sender, EventArgs e)
+        private async void OnDeleteButtonClicked(object? sender, EventArgs e)
         {
             if (_treeView.Selection.GetSelected(out TreeIter iter))
             {
                 var id = (int)_store.GetValue(iter, 0);
-                var doctor = _doctorService.GetDoctorById(id);
+                var doctor = await _doctorService.GetByIdAsync(id);
                 
                 if (doctor != null)
                 {
@@ -177,16 +178,8 @@ namespace DispensaryApp.UI.Pages
 
                     if (dialog.Run() == (int)ResponseType.Yes)
                     {
-                        try
-                        {
-                            _doctorService.DeleteDoctor(id);
-                            LoadDoctors();
-                            ShowMessage("Успех", "Врач успешно удален", MessageType.Info);
-                        }
-                        catch (Exception ex)
-                        {
-                            ShowMessage("Ошибка", $"Не удалось удалить врача: {ex.Message}", MessageType.Error);
-                        }
+                        await _doctorService.DeleteAsync(id);
+                        await Task.Run(() => LoadDoctors());
                     }
                     dialog.Destroy();
                 }

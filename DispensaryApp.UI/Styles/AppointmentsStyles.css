@@ -1,0 +1,94 @@
+@import url("Theme.css");
+
+button.appointments-action {
+    background-color: @laravel-light;
+    color: @laravel-white;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 2px;
+    font-weight: 500;
+    font-size: 13px;
+    min-width: 80px;
+}
+
+button.appointments-action:hover {
+    background-color: @laravel-lighter;
+    border-color: @primary-color;
+}
+
+button.appointments-add {
+    background-color: @laravel-success;
+    border-color: @laravel-success;
+}
+
+button.appointments-add:hover {
+    background-color: @laravel-success;
+    opacity: 0.8;
+}
+
+button.appointments-edit {
+    background-color: @laravel-info;
+    border-color: @laravel-info;
+}
+
+button.appointments-edit:hover {
+    background-color: @laravel-info;
+    opacity: 0.8;
+}
+
+button.appointments-delete {
+    background-color: @laravel-danger;
+    border-color: @laravel-danger;
+}
+
+button.appointments-delete:hover {
+    background-color: @laravel-danger;
+    opacity: 0.8;
+}
+
+box.appointments-controls {
+    margin: 4px;
+}
+
+treeview.appointments-list {
+    background-color: @laravel-light;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+}
+
+treeview.appointments-list header {
+    background-color: @laravel-darker;
+    border-bottom: 1px solid @laravel-border;
+    min-height: 42px;
+}
+
+treeview.appointments-list header button {
+    padding: 10px 14px;
+    color: @laravel-white;
+    font-weight: 600;
+    background-color: transparent;
+    border: none;
+}
+
+treeview.appointments-list header button:hover {
+    color: @primary-color;
+}
+
+treeview.appointments-list row {
+    min-height: 42px;
+}
+
+treeview.appointments-list row:nth-child(even) {
+    background-color: alpha(@laravel-lighter, 0.15);
+}
+
+treeview.appointments-list row:selected {
+    background-color: alpha(@primary-color, 0.3);
+    color: @laravel-white;
+    font-weight: 500;
+}
+
+treeview.appointments-list cell {
+    padding: 8px 10px;
+} 

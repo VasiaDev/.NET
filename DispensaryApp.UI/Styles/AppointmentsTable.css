@@ -1,0 +1,90 @@
+.appointments-table button {
+    background-color: @laravel-light;
+    color: @laravel-white;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 2px;
+    font-weight: 500;
+    font-size: 13px;
+    min-width: 80px;
+}
+
+.appointments-table button:hover {
+    background-color: @laravel-lighter;
+    border-color: @primary-color;
+}
+
+.appointments-table button.add-button {
+    background-color: @laravel-success;
+    border-color: @laravel-success;
+}
+
+.appointments-table button.add-button:hover {
+    background-color: alpha(@laravel-success, 0.8);
+}
+
+.appointments-table button.edit-button {
+    background-color: @laravel-info;
+    border-color: @laravel-info;
+}
+
+.appointments-table button.edit-button:hover {
+    background-color: alpha(@laravel-info, 0.8);
+}
+
+.appointments-table button.delete-button {
+    background-color: @laravel-danger;
+    border-color: @laravel-danger;
+}
+
+.appointments-table button.delete-button:hover {
+    background-color: alpha(@laravel-danger, 0.8);
+}
+
+.appointments-table box {
+    spacing: 4px;
+    margin: 4px;
+}
+
+.appointments-table treeview {
+    background-color: @laravel-light;
+    border: 1px solid @laravel-border;
+    border-radius: 4px;
+}
+
+.appointments-table treeview header {
+    background-color: @laravel-darker;
+    border-bottom: 1px solid @laravel-border;
+    min-height: 42px;
+}
+
+.appointments-table treeview header button {
+    padding: 10px 14px;
+    color: @laravel-white;
+    font-weight: 600;
+    background-color: transparent;
+    border: none;
+}
+
+.appointments-table treeview header button:hover {
+    color: @primary-color;
+}
+
+.appointments-table treeview row {
+    min-height: 42px;
+}
+
+.appointments-table treeview row:nth-child(even) {
+    background-color: alpha(@laravel-lighter, 0.15);
+}
+
+.appointments-table treeview row:selected {
+    background-color: alpha(@primary-color, 0.3);
+    color: @laravel-white;
+    font-weight: 500;
+}
+
+.appointments-table treeview cell {
+    padding: 8px 10px;
+} 

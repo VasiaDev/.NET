@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using DispensaryApp.Core.Models;
+using DispensaryApp.Data;
 
 namespace DispensaryApp.Core.Services
 {
@@ -11,11 +12,11 @@ namespace DispensaryApp.Core.Services
         private readonly PatientService _patientService;
         private readonly AppointmentService _appointmentService;
 
-        public ReportService()
+        public ReportService(DispensaryDbContext context)
         {
-            _doctorService = new DoctorService();
-            _patientService = new PatientService();
-            _appointmentService = new AppointmentService();
+            _doctorService = new DoctorService(context);
+            _patientService = new PatientService(context);
+            _appointmentService = new AppointmentService(context);
         }
 
         public string GenerateAppointmentsReport()

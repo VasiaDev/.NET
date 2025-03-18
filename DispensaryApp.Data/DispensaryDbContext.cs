@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using DispensaryApp.Core.Models;
+using DispensaryApp.Data.Models;
 
 namespace DispensaryApp.Data
 {
@@ -10,6 +10,8 @@ namespace DispensaryApp.Data
         {
         }
 
+        public DbSet<User> Users { get; set; }
+        public DbSet<MedicalRecord> MedicalRecords { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
@@ -18,16 +20,41 @@ namespace DispensaryApp.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Конфигурация для User
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
+                .IsUnique();
+
+            // Конфигурация для Patient
+            modelBuilder.Entity<Patient>();
+
+            // Конфигурация для Doctor
+            modelBuilder.Entity<Doctor>();
+
+            // Конфигурация для Appointment
             modelBuilder.Entity<Appointment>()
-                .HasOne<Patient>()
+                .HasOne(a => a.Patient)
                 .WithMany()
                 .HasForeignKey(a => a.PatientId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Appointment>()
-                .HasOne<Doctor>()
+                .HasOne(a => a.Doctor)
                 .WithMany()
                 .HasForeignKey(a => a.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Конфигурация для MedicalRecord
+            modelBuilder.Entity<MedicalRecord>()
+                .HasOne(m => m.Patient)
+                .WithMany()
+                .HasForeignKey(m => m.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MedicalRecord>()
+                .HasOne(m => m.Doctor)
+                .WithMany()
+                .HasForeignKey(m => m.DoctorId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

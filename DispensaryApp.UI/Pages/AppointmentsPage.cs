@@ -1,8 +1,11 @@
 using Gtk;
 using System;
+using System.Threading.Tasks;
 using DispensaryApp.Core.Models;
 using DispensaryApp.Core.Services;
 using DispensaryApp.UI.Dialogs;
+using DispensaryApp.UI.Styles;
+using DispensaryApp.Data;
 
 namespace DispensaryApp.UI.Pages
 {
@@ -16,18 +19,27 @@ namespace DispensaryApp.UI.Pages
         private readonly Button _cancelButton;
         private readonly ScrolledWindow _scrolledWindow;
 
-        public AppointmentsPage() : base(Orientation.Vertical, 0)
+        public AppointmentsPage(DispensaryDbContext context) : base(Orientation.Vertical, 0)
         {
-            _appointmentService = new AppointmentService();
+            _appointmentService = new AppointmentService(context);
             
             // Панель инструментов
+            var toolbar = new Box(Orientation.Horizontal, 6) { MarginStart = 6, MarginEnd = 6, MarginTop = 6, MarginBottom = 6 };
+            
             _addButton = new Button("Добавить");
             _editButton = new Button("Редактировать");
             _cancelButton = new Button("Отменить");
             
-            PackStart(_addButton, false, false, 0);
-            PackStart(_editButton, false, false, 0);
-            PackStart(_cancelButton, false, false, 0);
+            StyleManager.ApplyButtonStyle(_addButton);
+            StyleManager.ApplyButtonStyle(_editButton);
+            StyleManager.ApplyButtonStyle(_cancelButton);
+            
+            toolbar.PackStart(_addButton, false, false, 0);
+            toolbar.PackStart(_editButton, false, false, 0);
+            toolbar.PackStart(_cancelButton, false, false, 0);
+            toolbar.PackEnd(new Label(""), true, true, 0);
+            
+            PackStart(toolbar, false, false, 0);
 
             // Таблица приемов
             _store = new ListStore(typeof(int), typeof(string), typeof(string), typeof(string), 
@@ -35,8 +47,17 @@ namespace DispensaryApp.UI.Pages
             
             _treeView = new TreeView(_store)
             {
-                HeadersVisible = true
+                HeadersVisible = true,
+                Reorderable = true
             };
+            
+            foreach (var column in _treeView.Columns)
+            {
+                column.Resizable = true;
+                column.Clickable = true;
+            }
+            
+            StyleManager.ApplyTreeViewStyle(_treeView);
             
             _treeView.AppendColumn("ID", new CellRendererText(), "text", 0);
             _treeView.AppendColumn("Пациент", new CellRendererText(), "text", 1);
@@ -48,7 +69,8 @@ namespace DispensaryApp.UI.Pages
             
             _scrolledWindow = new ScrolledWindow
             {
-                Child = _treeView
+                Child = _treeView,
+                ShadowType = ShadowType.In
             };
             
             PackStart(_scrolledWindow, true, true, 0);
@@ -62,12 +84,12 @@ namespace DispensaryApp.UI.Pages
             LoadAppointments();
         }
 
-        private void LoadAppointments()
+        private async void LoadAppointments()
         {
             try
             {
                 _store.Clear();
-                var appointments = _appointmentService.GetAllAppointments();
+                var appointments = await _appointmentService.GetAllAsync();
                 
                 foreach (var appointment in appointments)
                 {
@@ -96,34 +118,34 @@ namespace DispensaryApp.UI.Pages
             }
         }
 
-        private void OnAddButtonClicked(object? sender, EventArgs e)
+        private async void OnAddButtonClicked(object? sender, EventArgs e)
         {
             if (Toplevel is Window parent)
             {
-                var dialog = new AppointmentDialog(parent);
+                var dialog = new AppointmentDialog(parent, _appointmentService.Context);
                 if (dialog.Run() == (int)ResponseType.Accept)
                 {
-                    LoadAppointments();
+                    await Task.Run(() => LoadAppointments());
                 }
                 dialog.Destroy();
             }
         }
 
-        private void OnEditButtonClicked(object? sender, EventArgs e)
+        private async void OnEditButtonClicked(object? sender, EventArgs e)
         {
             if (_treeView.Selection.GetSelected(out TreeIter iter))
             {
                 var id = (int)_store.GetValue(iter, 0);
-                var appointment = _appointmentService.GetAppointmentById(id);
+                var appointment = await _appointmentService.GetByIdAsync(id);
                 
                 if (appointment != null)
                 {
                     if (Toplevel is Window parent)
                     {
-                        var dialog = new AppointmentDialog(parent, appointment);
+                        var dialog = new AppointmentDialog(parent, _appointmentService.Context, appointment);
                         if (dialog.Run() == (int)ResponseType.Accept)
                         {
-                            LoadAppointments();
+                            await Task.Run(() => LoadAppointments());
                         }
                         dialog.Destroy();
                     }
@@ -135,15 +157,15 @@ namespace DispensaryApp.UI.Pages
             }
         }
 
-        private void OnCancelButtonClicked(object? sender, EventArgs e)
+        private async void OnCancelButtonClicked(object? sender, EventArgs e)
         {
             if (_treeView.Selection.GetSelected(out TreeIter iter))
             {
                 var id = (int)_store.GetValue(iter, 0);
                 try
                 {
-                    _appointmentService.CancelAppointment(id);
-                    LoadAppointments();
+                    await _appointmentService.CancelAppointmentAsync(id);
+                    await Task.Run(() => LoadAppointments());
                     ShowMessage("Успех", "Прием успешно отменен", MessageType.Info);
                 }
                 catch (Exception ex)

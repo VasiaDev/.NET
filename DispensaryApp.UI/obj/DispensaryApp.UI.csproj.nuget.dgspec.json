@@ -25,7 +25,11 @@
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {}
+            "projectReferences": {
+              "C:\\Users\\Vasia\\Desktop\\IndividualWork\\DispensaryApp.Data\\DispensaryApp.Data.csproj": {
+                "projectPath": "C:\\Users\\Vasia\\Desktop\\IndividualWork\\DispensaryApp.Data\\DispensaryApp.Data.csproj"
+              }
+            }
           }
         },
         "warningProperties": {
@@ -46,11 +50,7 @@
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[7.0.0, )"
-            },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
-              "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[8.0.0, )"
             }
           },
           "imports": [
@@ -108,11 +108,7 @@
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {
-              "C:\\Users\\Vasia\\Desktop\\IndividualWork\\DispensaryApp.Core\\DispensaryApp.Core.csproj": {
-                "projectPath": "C:\\Users\\Vasia\\Desktop\\IndividualWork\\DispensaryApp.Core\\DispensaryApp.Core.csproj"
-              }
-            }
+            "projectReferences": {}
           }
         },
         "warningProperties": {
@@ -137,9 +133,9 @@
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[8.0.0, )"
             },
-            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+            "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
               "version": "[8.0.0, )"
             }

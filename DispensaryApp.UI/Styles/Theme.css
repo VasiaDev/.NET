@@ -191,10 +191,28 @@ notebook stack {
 
 /* Диалоги */
 dialog {
-    background-color: @laravel-light;
+    background-color: @laravel-dark;
+    color: @laravel-white;
     border: 1px solid @laravel-border;
     border-radius: 4px;
-    padding: 0;
+    padding: 16px;
+}
+
+dialog label {
+    color: @laravel-white;
+}
+
+dialog message {
+    color: @laravel-white;
+}
+
+messagedialog {
+    background-color: @laravel-dark;
+    color: @laravel-white;
+}
+
+messagedialog label {
+    color: @laravel-white;
 }
 
 dialog .dialog-title-bar {
@@ -589,4 +607,104 @@ button.icon-button {
 button.icon-button:hover {
     background-color: @laravel-light;
     border-radius: 4px;
+}
+
+/* Стили для кнопок в таблице приёмов */
+button.add {
+    background-color: @laravel-success;
+    color: @laravel-white;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 2px;
+}
+
+button.edit {
+    background-color: @laravel-info;
+    color: @laravel-white;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 2px;
+}
+
+button.delete {
+    background-color: @laravel-danger;
+    color: @laravel-white;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 2px;
+}
+
+box {
+    margin: 4px;
+}
+
+/* Стили для заголовка таблицы */
+.appointments-table treeview header {
+    background-color: @laravel-darker;
+    border-bottom: 1px solid @laravel-border;
+    min-height: 42px;
+}
+
+.appointments-table treeview header button {
+    padding: 10px 14px;
+    color: @laravel-white;
+    font-weight: 600;
+    background-color: transparent;
+    border: none;
+}
+
+.appointments-table treeview header button:hover {
+    color: @primary-color;
+}
+
+/* Стили для строк таблицы */
+.appointments-table treeview row {
+    min-height: 42px;
+}
+
+.appointments-table treeview row:nth-child(even) {
+    background-color: alpha(@laravel-lighter, 0.15);
+}
+
+.appointments-table treeview row:selected {
+    background-color: alpha(@primary-color, 0.3);
+    color: @laravel-white;
+    font-weight: 500;
+}
+
+.appointments-table treeview cell {
+    padding: 8px 10px;
+}
+
+button {
+    background-color: @laravel-light;
+    color: @laravel-white;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 2px;
+}
+
+button.add {
+    background-color: @laravel-success;
+}
+
+button.edit {
+    background-color: @laravel-info;
+}
+
+button.delete {
+    background-color: @laravel-danger;
+}
+
+box {
+    margin: 4px;
+}
+
+treeview {
+    background-color: @laravel-light;
+    color: @laravel-white;
+}
+
+treeview:selected {
+    background-color: @laravel-red;
 } 

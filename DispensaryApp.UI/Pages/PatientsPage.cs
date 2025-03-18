@@ -1,10 +1,11 @@
 using Gtk;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using DispensaryApp.Core.Models;
 using DispensaryApp.Core.Services;
 using DispensaryApp.UI.Dialogs;
 using DispensaryApp.UI.Styles;
+using DispensaryApp.Data;
 
 namespace DispensaryApp.UI.Pages
 {
@@ -18,9 +19,9 @@ namespace DispensaryApp.UI.Pages
         private readonly Button _deleteButton;
         private readonly ScrolledWindow _scrolledWindow;
 
-        public PatientsPage() : base(Orientation.Vertical, 0)
+        public PatientsPage(DispensaryDbContext context) : base(Orientation.Vertical, 0)
         {
-            _patientService = new PatientService();
+            _patientService = new PatientService(context);
             
             // Панель инструментов
             var toolbar = new Box(Orientation.Horizontal, 6) { MarginStart = 6, MarginEnd = 6, MarginTop = 6, MarginBottom = 6 };
@@ -84,12 +85,12 @@ namespace DispensaryApp.UI.Pages
             LoadPatients();
         }
 
-        private void LoadPatients()
+        private async void LoadPatients()
         {
             try
             {
                 _store.Clear();
-                var patients = _patientService.GetAllPatients();
+                var patients = await _patientService.GetAllAsync();
                 
                 foreach (var patient in patients)
                 {
@@ -111,34 +112,34 @@ namespace DispensaryApp.UI.Pages
             }
         }
 
-        private void OnAddButtonClicked(object? sender, EventArgs e)
+        private async void OnAddButtonClicked(object? sender, EventArgs e)
         {
             if (Toplevel is Window parent)
             {
-                var dialog = new PatientDialog(parent);
+                var dialog = new PatientDialog(parent, _patientService.Context);
                 if (dialog.Run() == (int)ResponseType.Accept)
                 {
-                    LoadPatients();
+                    await Task.Run(() => LoadPatients());
                 }
                 dialog.Destroy();
             }
         }
 
-        private void OnEditButtonClicked(object? sender, EventArgs e)
+        private async void OnEditButtonClicked(object? sender, EventArgs e)
         {
             if (_treeView.Selection.GetSelected(out TreeIter iter))
             {
                 var id = (int)_store.GetValue(iter, 0);
-                var patient = _patientService.GetPatientById(id);
+                var patient = await _patientService.GetByIdAsync(id);
                 
                 if (patient != null)
                 {
                     if (Toplevel is Window parent)
                     {
-                        var dialog = new PatientDialog(parent, patient);
+                        var dialog = new PatientDialog(parent, _patientService.Context, patient);
                         if (dialog.Run() == (int)ResponseType.Accept)
                         {
-                            LoadPatients();
+                            await Task.Run(() => LoadPatients());
                         }
                         dialog.Destroy();
                     }
@@ -150,12 +151,12 @@ namespace DispensaryApp.UI.Pages
             }
         }
 
-        private void OnDeleteButtonClicked(object? sender, EventArgs e)
+        private async void OnDeleteButtonClicked(object? sender, EventArgs e)
         {
             if (_treeView.Selection.GetSelected(out TreeIter iter))
             {
                 var id = (int)_store.GetValue(iter, 0);
-                var patient = _patientService.GetPatientById(id);
+                var patient = await _patientService.GetByIdAsync(id);
                 
                 if (patient != null)
                 {
@@ -172,16 +173,8 @@ namespace DispensaryApp.UI.Pages
 
                     if (dialog.Run() == (int)ResponseType.Yes)
                     {
-                        try
-                        {
-                            _patientService.DeletePatient(id);
-                            LoadPatients();
-                            ShowMessage("Успех", "Пациент успешно удален", MessageType.Info);
-                        }
-                        catch (Exception ex)
-                        {
-                            ShowMessage("Ошибка", $"Не удалось удалить пациента: {ex.Message}", MessageType.Error);
-                        }
+                        await _patientService.DeleteAsync(id);
+                        await Task.Run(() => LoadPatients());
                     }
                     dialog.Destroy();
                 }

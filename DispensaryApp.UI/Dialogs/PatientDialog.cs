@@ -3,6 +3,7 @@ using System;
 using DispensaryApp.Core.Models;
 using DispensaryApp.Core.Services;
 using DispensaryApp.UI.Styles;
+using DispensaryApp.Data;
 
 namespace DispensaryApp.UI.Dialogs
 {
@@ -21,9 +22,9 @@ namespace DispensaryApp.UI.Dialogs
         private readonly Button _saveButton;
         private readonly Button _cancelButton;
 
-        public PatientDialog(Window parent, Patient? patient = null) : base("Пациент", parent, DialogFlags.Modal)
+        public PatientDialog(Window parent, DispensaryDbContext context, Patient? patient = null) : base("Пациент", parent, DialogFlags.Modal)
         {
-            _patientService = new PatientService();
+            _patientService = new PatientService(context);
             
             // Проверка на null
             if (parent == null)
