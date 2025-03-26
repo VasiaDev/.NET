@@ -31,3 +31,4 @@ C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Security\obj\Debug\net8.0\Di
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Security\obj\Debug\net8.0\refint\DispensaryApp.Security.dll
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Security\obj\Debug\net8.0\DispensaryApp.Security.pdb
 C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Security\obj\Debug\net8.0\ref\DispensaryApp.Security.dll
+C:\Users\Vasia\Desktop\IndividualWork\DispensaryApp.Security\bin\Debug\net8.0\appsettings.json

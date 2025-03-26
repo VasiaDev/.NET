@@ -1,9 +1,9 @@
 using Gtk;
 using System;
-using DispensaryApp.Core.Models;
+using DispensaryApp.Data.Models;
 using DispensaryApp.Core.Services;
 using DispensaryApp.UI.Styles;
-using DispensaryApp.Data;
+using Microsoft.Extensions.Logging;
 
 namespace DispensaryApp.UI.Dialogs
 {
@@ -14,37 +14,45 @@ namespace DispensaryApp.UI.Dialogs
         private readonly Entry _lastNameEntry;
         private readonly Entry _firstNameEntry;
         private readonly Entry _middleNameEntry;
+        private readonly Entry _specialtyEntry;
         private readonly Entry _specializationEntry;
         private readonly Entry _licenseNumberEntry;
         private readonly Entry _phoneEntry;
         private readonly Entry _emailEntry;
         private readonly Entry _scheduleEntry;
-        private readonly Calendar _hireDateCalendar;
         private readonly Button _saveButton;
         private readonly Button _cancelButton;
 
-        public DoctorDialog(Window parent, DispensaryDbContext context, Doctor? doctor = null) : base("Доктор", parent, DialogFlags.Modal)
+        public DoctorDialog(Window parent, Doctor? doctor = null) : base("Врач", parent, DialogFlags.Modal)
         {
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+                builder.AddDebug();
+            });
+            var logger = loggerFactory.CreateLogger<DoctorService>();
+            _doctorService = new DoctorService(logger);
+            
+            // Проверка на null
             if (parent == null)
             {
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            _doctorService = new DoctorService(context);
             _doctor = doctor ?? new Doctor
             {
                 LastName = "",
                 FirstName = "",
                 MiddleName = "",
+                Specialty = "",
                 Specialization = "",
                 LicenseNumber = "",
                 Phone = "",
                 Email = "",
-                Schedule = "",
-                HireDate = DateTime.Now
+                Schedule = ""
             };
-            
-            var vbox = new Box(Orientation.Vertical, 6);
+
+            var vbox = new Box(Orientation.Vertical, 6) { BorderWidth = 12 };
             
             // ФИО
             var nameBox = new Box(Orientation.Horizontal, 6);
@@ -56,13 +64,15 @@ namespace DispensaryApp.UI.Dialogs
             nameBox.PackStart(_middleNameEntry, true, true, 0);
             vbox.PackStart(nameBox, false, false, 0);
 
-            // Специализация и лицензия
-            var specializationBox = new Box(Orientation.Horizontal, 6);
-            specializationBox.PackStart(new Label("Специализация:"), false, false, 0);
+            // Специальность и специализация
+            var specialtyBox = new Box(Orientation.Horizontal, 6);
+            _specialtyEntry = new Entry { PlaceholderText = "Специальность" };
             _specializationEntry = new Entry { PlaceholderText = "Специализация" };
-            specializationBox.PackStart(_specializationEntry, true, true, 0);
-            vbox.PackStart(specializationBox, false, false, 0);
+            specialtyBox.PackStart(_specialtyEntry, true, true, 0);
+            specialtyBox.PackStart(_specializationEntry, true, true, 0);
+            vbox.PackStart(specialtyBox, false, false, 0);
 
+            // Лицензия
             var licenseBox = new Box(Orientation.Horizontal, 6);
             licenseBox.PackStart(new Label("Номер лицензии:"), false, false, 0);
             _licenseNumberEntry = new Entry { PlaceholderText = "Номер лицензии" };
@@ -83,13 +93,6 @@ namespace DispensaryApp.UI.Dialogs
             _scheduleEntry = new Entry { PlaceholderText = "График работы" };
             scheduleBox.PackStart(_scheduleEntry, true, true, 0);
             vbox.PackStart(scheduleBox, false, false, 0);
-
-            // Дата приема на работу
-            var hireDateBox = new Box(Orientation.Horizontal, 6);
-            hireDateBox.PackStart(new Label("Дата приема на работу:"), false, false, 0);
-            _hireDateCalendar = new Calendar();
-            hireDateBox.PackStart(_hireDateCalendar, true, true, 0);
-            vbox.PackStart(hireDateBox, false, false, 0);
 
             // Кнопки
             var buttonBox = new Box(Orientation.Horizontal, 6);
@@ -112,34 +115,42 @@ namespace DispensaryApp.UI.Dialogs
             {
                 _lastNameEntry.Text = doctor.LastName;
                 _firstNameEntry.Text = doctor.FirstName;
-                _middleNameEntry.Text = doctor.MiddleName;
-                _specializationEntry.Text = doctor.Specialization;
-                _licenseNumberEntry.Text = doctor.LicenseNumber;
-                _phoneEntry.Text = doctor.Phone;
-                _emailEntry.Text = doctor.Email;
-                _scheduleEntry.Text = doctor.Schedule;
-                _hireDateCalendar.Date = doctor.HireDate;
+                _middleNameEntry.Text = doctor.MiddleName ?? "";
+                _specialtyEntry.Text = doctor.Specialty;
+                _specializationEntry.Text = doctor.Specialization ?? "";
+                _licenseNumberEntry.Text = doctor.LicenseNumber ?? "";
+                _phoneEntry.Text = doctor.Phone ?? "";
+                _emailEntry.Text = doctor.Email ?? "";
+                _scheduleEntry.Text = doctor.Schedule ?? "";
             }
 
             ContentArea.PackStart(vbox, true, true, 0);
             ShowAll();
         }
 
-        private void OnSaveClicked(object? sender, EventArgs e)
+        private async void OnSaveClicked(object? sender, EventArgs e)
         {
             try
             {
                 _doctor.LastName = _lastNameEntry.Text;
                 _doctor.FirstName = _firstNameEntry.Text;
                 _doctor.MiddleName = _middleNameEntry.Text;
+                _doctor.Specialty = _specialtyEntry.Text;
                 _doctor.Specialization = _specializationEntry.Text;
                 _doctor.LicenseNumber = _licenseNumberEntry.Text;
                 _doctor.Phone = _phoneEntry.Text;
                 _doctor.Email = _emailEntry.Text;
                 _doctor.Schedule = _scheduleEntry.Text;
-                _doctor.HireDate = _hireDateCalendar.Date;
 
-                _doctorService.SaveDoctor(_doctor);
+                if (_doctor.Id == 0)
+                {
+                    await _doctorService.AddAsync(_doctor);
+                }
+                else
+                {
+                    await _doctorService.UpdateAsync(_doctor);
+                }
+                
                 Respond(ResponseType.Accept);
             }
             catch (Exception ex)

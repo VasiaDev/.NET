@@ -1,9 +1,9 @@
 using Gtk;
 using System;
-using DispensaryApp.Core.Models;
+using DispensaryApp.Data.Models;
 using DispensaryApp.Core.Services;
 using DispensaryApp.UI.Styles;
-using DispensaryApp.Data;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DispensaryApp.UI.Dialogs
 {
@@ -17,14 +17,19 @@ namespace DispensaryApp.UI.Dialogs
         private readonly Entry _insurancePolicyEntry;
         private readonly Entry _phoneEntry;
         private readonly Entry _emailEntry;
-        private readonly Entry _addressEntry;
+        private readonly Entry _genderEntry;
         private readonly Calendar _birthDateCalendar;
         private readonly Button _saveButton;
         private readonly Button _cancelButton;
 
-        public PatientDialog(Window parent, DispensaryDbContext context, Patient? patient = null) : base("Пациент", parent, DialogFlags.Modal)
+        public PatientDialog(Window parent, Patient? patient = null) : base("Пациент", parent, DialogFlags.Modal)
         {
-            _patientService = new PatientService(context);
+            // Получаем сервис из DI контейнера
+            if (Program.ServiceProvider == null)
+            {
+                throw new InvalidOperationException("ServiceProvider не найден");
+            }
+            _patientService = Program.ServiceProvider.GetRequiredService<PatientService>();
             
             // Проверка на null
             if (parent == null)
@@ -34,14 +39,11 @@ namespace DispensaryApp.UI.Dialogs
 
             _patient = patient ?? new Patient
             {
-                LastName = "Введите фамилию",
-                FirstName = "Введите имя",
-                MiddleName = "Введите отчество",
-                InsurancePolicy = "Введите полис",
-                Phone = "Введите телефон",
-                Email = "Введите email",
-                Address = "Введите адрес",
-                BirthDate = DateTime.Now
+                LastName = "",
+                FirstName = "",
+                MiddleName = "",
+                Gender = "",
+                DateOfBirth = DateTime.Now
             };
 
             var vbox = new Box(Orientation.Vertical, 6) { BorderWidth = 12 };
@@ -71,12 +73,12 @@ namespace DispensaryApp.UI.Dialogs
             contactsBox.PackStart(_emailEntry, true, true, 0);
             vbox.PackStart(contactsBox, false, false, 0);
 
-            // Адрес
-            var addressBox = new Box(Orientation.Horizontal, 6);
-            addressBox.PackStart(new Label("Адрес:"), false, false, 0);
-            _addressEntry = new Entry { PlaceholderText = "Адрес проживания" };
-            addressBox.PackStart(_addressEntry, true, true, 0);
-            vbox.PackStart(addressBox, false, false, 0);
+            // Пол
+            var genderBox = new Box(Orientation.Horizontal, 6);
+            genderBox.PackStart(new Label("Пол:"), false, false, 0);
+            _genderEntry = new Entry { PlaceholderText = "М/Ж" };
+            genderBox.PackStart(_genderEntry, true, true, 0);
+            vbox.PackStart(genderBox, false, false, 0);
 
             // Дата рождения
             var birthDateBox = new Box(Orientation.Horizontal, 6);
@@ -106,19 +108,19 @@ namespace DispensaryApp.UI.Dialogs
             {
                 _lastNameEntry.Text = patient.LastName;
                 _firstNameEntry.Text = patient.FirstName;
-                _middleNameEntry.Text = patient.MiddleName;
-                _insurancePolicyEntry.Text = patient.InsurancePolicy;
-                _phoneEntry.Text = patient.Phone;
-                _emailEntry.Text = patient.Email;
-                _addressEntry.Text = patient.Address;
-                _birthDateCalendar.Date = patient.BirthDate;
+                _middleNameEntry.Text = patient.MiddleName ?? "";
+                _insurancePolicyEntry.Text = patient.InsurancePolicy ?? "";
+                _phoneEntry.Text = patient.Phone ?? "";
+                _emailEntry.Text = patient.Email ?? "";
+                _genderEntry.Text = patient.Gender;
+                _birthDateCalendar.Date = patient.DateOfBirth;
             }
 
             ContentArea.PackStart(vbox, true, true, 0);
             ShowAll();
         }
 
-        private void OnSaveClicked(object? sender, EventArgs e)
+        private async void OnSaveClicked(object? sender, EventArgs e)
         {
             try
             {
@@ -128,10 +130,18 @@ namespace DispensaryApp.UI.Dialogs
                 _patient.InsurancePolicy = _insurancePolicyEntry.Text;
                 _patient.Phone = _phoneEntry.Text;
                 _patient.Email = _emailEntry.Text;
-                _patient.Address = _addressEntry.Text;
-                _patient.BirthDate = _birthDateCalendar.Date;
+                _patient.Gender = _genderEntry.Text;
+                _patient.DateOfBirth = _birthDateCalendar.Date;
 
-                _patientService.SavePatient(_patient);
+                if (_patient.Id == 0)
+                {
+                    await _patientService.AddAsync(_patient);
+                }
+                else
+                {
+                    await _patientService.UpdateAsync(_patient);
+                }
+                
                 Respond(ResponseType.Accept);
             }
             catch (Exception ex)

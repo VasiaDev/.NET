@@ -1,192 +1,190 @@
 using Gtk;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using DispensaryApp.Core.Models;
 using DispensaryApp.Core.Services;
+using DispensaryApp.Data.Models;
 using DispensaryApp.UI.Dialogs;
 using DispensaryApp.UI.Styles;
-using DispensaryApp.Data;
+using GLib;
 
 namespace DispensaryApp.UI.Pages
 {
     public class AppointmentsPage : Box
     {
-        private readonly AppointmentService _appointmentService;
+        private readonly ListStore _listStore;
         private readonly TreeView _treeView;
-        private readonly ListStore _store;
-        private readonly Button _addButton;
-        private readonly Button _editButton;
-        private readonly Button _cancelButton;
-        private readonly ScrolledWindow _scrolledWindow;
+        private readonly AppointmentService _appointmentService;
+        private readonly PatientService _patientService;
+        private readonly DoctorService _doctorService;
 
-        public AppointmentsPage(DispensaryDbContext context) : base(Orientation.Vertical, 0)
+        public AppointmentsPage(AppointmentService appointmentService, PatientService patientService, DoctorService doctorService) 
+            : base(Orientation.Vertical, 5)
         {
-            _appointmentService = new AppointmentService(context);
-            
-            // Панель инструментов
-            var toolbar = new Box(Orientation.Horizontal, 6) { MarginStart = 6, MarginEnd = 6, MarginTop = 6, MarginBottom = 6 };
-            
-            _addButton = new Button("Добавить");
-            _editButton = new Button("Редактировать");
-            _cancelButton = new Button("Отменить");
-            
-            StyleManager.ApplyButtonStyle(_addButton);
-            StyleManager.ApplyButtonStyle(_editButton);
-            StyleManager.ApplyButtonStyle(_cancelButton);
-            
-            toolbar.PackStart(_addButton, false, false, 0);
-            toolbar.PackStart(_editButton, false, false, 0);
-            toolbar.PackStart(_cancelButton, false, false, 0);
-            toolbar.PackEnd(new Label(""), true, true, 0);
-            
-            PackStart(toolbar, false, false, 0);
+            _appointmentService = appointmentService;
+            _patientService = patientService;
+            _doctorService = doctorService;
 
-            // Таблица приемов
-            _store = new ListStore(typeof(int), typeof(string), typeof(string), typeof(string), 
-                                 typeof(string), typeof(string), typeof(string));
-            
-            _treeView = new TreeView(_store)
+            // Создаем модель данных
+            _listStore = new ListStore(
+                typeof(int),    // ID
+                typeof(string), // Дата
+                typeof(string), // Время
+                typeof(string), // Пациент
+                typeof(string), // Врач
+                typeof(string), // Причина
+                typeof(string)  // Статус
+            );
+
+            // Создаем представление
+            _treeView = new TreeView(_listStore)
             {
                 HeadersVisible = true,
                 Reorderable = true
             };
-            
-            foreach (var column in _treeView.Columns)
-            {
-                column.Resizable = true;
-                column.Clickable = true;
-            }
-            
-            StyleManager.ApplyTreeViewStyle(_treeView);
-            
-            _treeView.AppendColumn("ID", new CellRendererText(), "text", 0);
-            _treeView.AppendColumn("Пациент", new CellRendererText(), "text", 1);
-            _treeView.AppendColumn("Врач", new CellRendererText(), "text", 2);
-            _treeView.AppendColumn("Дата", new CellRendererText(), "text", 3);
-            _treeView.AppendColumn("Время", new CellRendererText(), "text", 4);
-            _treeView.AppendColumn("Статус", new CellRendererText(), "text", 5);
-            _treeView.AppendColumn("Тип", new CellRendererText(), "text", 6);
-            
-            _scrolledWindow = new ScrolledWindow
-            {
-                Child = _treeView,
-                ShadowType = ShadowType.In
-            };
-            
-            PackStart(_scrolledWindow, true, true, 0);
 
-            // Подключаем обработчики событий
-            _addButton.Clicked += OnAddButtonClicked;
-            _editButton.Clicked += OnEditButtonClicked;
-            _cancelButton.Clicked += OnCancelButtonClicked;
+            // Добавляем колонки
+            _treeView.AppendColumn("ID", new CellRendererText(), "text", 0);
+            _treeView.AppendColumn("Дата", new CellRendererText(), "text", 1);
+            _treeView.AppendColumn("Время", new CellRendererText(), "text", 2);
+            _treeView.AppendColumn("Пациент", new CellRendererText(), "text", 3);
+            _treeView.AppendColumn("Врач", new CellRendererText(), "text", 4);
+            _treeView.AppendColumn("Причина", new CellRendererText(), "text", 5);
+            _treeView.AppendColumn("Статус", new CellRendererText(), "text", 6);
+
+            // Создаем кнопки
+            var buttonBox = new Box(Orientation.Horizontal, 5);
+            var addButton = new Button("Добавить");
+            var editButton = new Button("Редактировать");
+            var deleteButton = new Button("Удалить");
+            var cancelButton = new Button("Отменить");
+
+            buttonBox.PackStart(addButton, true, true, 5);
+            buttonBox.PackStart(editButton, true, true, 5);
+            buttonBox.PackStart(deleteButton, true, true, 5);
+            buttonBox.PackStart(cancelButton, true, true, 5);
+
+            // Подключаем обработчики
+            addButton.Clicked += OnAddClicked;
+            editButton.Clicked += OnEditClicked;
+            deleteButton.Clicked += OnDeleteClicked;
+            cancelButton.Clicked += OnCancelClicked;
+
+            // Создаем скролл для таблицы
+            var scrollWindow = new ScrolledWindow
+            {
+                ShadowType = ShadowType.In,
+                HscrollbarPolicy = PolicyType.Automatic,
+                VscrollbarPolicy = PolicyType.Automatic
+            };
+            scrollWindow.Add(_treeView);
+
+            // Добавляем элементы на страницу
+            PackStart(buttonBox, false, false, 5);
+            PackStart(scrollWindow, true, true, 5);
 
             // Загружаем данные
-            LoadAppointments();
+            _ = LoadDataAsync();
         }
 
-        private async void LoadAppointments()
+        private async System.Threading.Tasks.Task LoadDataAsync()
         {
             try
             {
-                _store.Clear();
+                _listStore.Clear();
                 var appointments = await _appointmentService.GetAllAsync();
-                
                 foreach (var appointment in appointments)
                 {
-                    var patientName = appointment.Patient != null 
-                        ? $"{appointment.Patient.LastName} {appointment.Patient.FirstName} {appointment.Patient.MiddleName}" 
-                        : "Неизвестный пациент";
-
-                    var doctorName = appointment.Doctor != null 
-                        ? $"{appointment.Doctor.LastName} {appointment.Doctor.FirstName} {appointment.Doctor.MiddleName}" 
-                        : "Неизвестный врач";
-
-                    _store.AppendValues(
+                    _listStore.AppendValues(
                         appointment.Id,
-                        patientName,
-                        doctorName,
-                        appointment.Date.ToString("dd.MM.yyyy"),
-                        appointment.Time.ToString(@"hh\:mm"),
-                        appointment.Status,
-                        appointment.Type
+                        appointment.AppointmentDate.ToString("dd.MM.yyyy"),
+                        appointment.AppointmentDate.ToString("HH:mm"),
+                        $"{appointment.Patient.LastName} {appointment.Patient.FirstName}",
+                        $"{appointment.Doctor.LastName} {appointment.Doctor.FirstName}",
+                        appointment.Reason,
+                        appointment.Status.ToString()
                     );
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage("Ошибка", $"Не удалось загрузить список приемов: {ex.Message}", MessageType.Error);
+                var dialog = new MessageDialog(
+                    this.Toplevel as Window,
+                    DialogFlags.Modal,
+                    MessageType.Error,
+                    ButtonsType.Ok,
+                    $"Ошибка при загрузке данных: {ex.Message}"
+                );
+                dialog.Run();
+                dialog.Destroy();
             }
         }
 
-        private async void OnAddButtonClicked(object? sender, EventArgs e)
+        private async void OnAddClicked(object? sender, EventArgs e)
         {
-            if (Toplevel is Window parent)
+            var dialog = new AppointmentDialog(this.Toplevel as Window);
+            if (dialog.Run() == (int)ResponseType.Accept)
             {
-                var dialog = new AppointmentDialog(parent, _appointmentService.Context);
+                await LoadDataAsync();
+            }
+            dialog.Destroy();
+        }
+
+        private async void OnEditClicked(object? sender, EventArgs e)
+        {
+            var selection = _treeView.Selection;
+            if (selection.GetSelected(out TreeIter iter))
+            {
+                var id = (int)_listStore.GetValue(iter, 0);
+                var appointment = await _appointmentService.GetByIdAsync(id);
+                var dialog = new AppointmentDialog(this.Toplevel as Window, appointment);
                 if (dialog.Run() == (int)ResponseType.Accept)
                 {
-                    await Task.Run(() => LoadAppointments());
+                    await LoadDataAsync();
                 }
                 dialog.Destroy();
             }
         }
 
-        private async void OnEditButtonClicked(object? sender, EventArgs e)
+        private async void OnDeleteClicked(object? sender, EventArgs e)
         {
-            if (_treeView.Selection.GetSelected(out TreeIter iter))
+            var selection = _treeView.Selection;
+            if (selection.GetSelected(out TreeIter iter))
             {
-                var id = (int)_store.GetValue(iter, 0);
+                var id = (int)_listStore.GetValue(iter, 0);
+                var dialog = new MessageDialog(
+                    this.Toplevel as Window,
+                    DialogFlags.Modal,
+                    MessageType.Question,
+                    ButtonsType.YesNo,
+                    "Вы уверены, что хотите удалить эту запись?"
+                );
+                if (dialog.Run() == (int)ResponseType.Yes)
+                {
+                    await _appointmentService.DeleteAsync(id);
+                    await LoadDataAsync();
+                }
+                dialog.Destroy();
+            }
+        }
+
+        private async void OnCancelClicked(object? sender, EventArgs e)
+        {
+            var selection = _treeView.Selection;
+            if (selection.GetSelected(out TreeIter iter))
+            {
+                var id = (int)_listStore.GetValue(iter, 0);
                 var appointment = await _appointmentService.GetByIdAsync(id);
-                
-                if (appointment != null)
-                {
-                    if (Toplevel is Window parent)
-                    {
-                        var dialog = new AppointmentDialog(parent, _appointmentService.Context, appointment);
-                        if (dialog.Run() == (int)ResponseType.Accept)
-                        {
-                            await Task.Run(() => LoadAppointments());
-                        }
-                        dialog.Destroy();
-                    }
-                }
-            }
-            else
-            {
-                ShowMessage("Предупреждение", "Выберите прием для редактирования", MessageType.Warning);
+                appointment.Status = AppointmentStatus.Cancelled;
+                await _appointmentService.UpdateAsync(appointment);
+                await LoadDataAsync();
             }
         }
 
-        private async void OnCancelButtonClicked(object? sender, EventArgs e)
+        public new void Show()
         {
-            if (_treeView.Selection.GetSelected(out TreeIter iter))
-            {
-                var id = (int)_store.GetValue(iter, 0);
-                try
-                {
-                    await _appointmentService.CancelAppointmentAsync(id);
-                    await Task.Run(() => LoadAppointments());
-                    ShowMessage("Успех", "Прием успешно отменен", MessageType.Info);
-                }
-                catch (Exception ex)
-                {
-                    ShowMessage("Ошибка", $"Не удалось отменить прием: {ex.Message}", MessageType.Error);
-                }
-            }
-            else
-            {
-                ShowMessage("Предупреждение", "Выберите прием для отмены", MessageType.Warning);
-            }
-        }
-
-        private void ShowMessage(string title, string message, MessageType type)
-        {
-            var dialog = new MessageDialog(Toplevel as Window, DialogFlags.Modal, type, ButtonsType.Ok, message)
-            {
-                Title = title
-            };
-            dialog.Run();
-            dialog.Destroy();
+            base.Show();
+            _ = LoadDataAsync();
         }
     }
 } 

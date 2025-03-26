@@ -20,14 +20,15 @@ namespace DispensaryApp.Data.Models
         public DateTime RecordDate { get; set; }
         
         [Required]
-        public string Description { get; set; }
+        [StringLength(1000)]
+        public string Description { get; set; } = "";
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("PatientId")]
-        public virtual Patient Patient { get; set; }
+        public virtual Patient Patient { get; set; } = null!;
 
         [ForeignKey("DoctorId")]
-        public virtual Doctor Doctor { get; set; }
+        public virtual Doctor Doctor { get; set; } = null!;
     }
 } 

@@ -5,6 +5,9 @@ using DispensaryApp.UI.Styles;
 using DispensaryApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using DispensaryApp.Core.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DispensaryApp.UI
 {
@@ -15,7 +18,6 @@ namespace DispensaryApp.UI
         private readonly PatientsPage _patientsPage;
         private readonly DoctorsPage _doctorsPage;
         private readonly ReportsPage _reportsPage;
-        private readonly DispensaryDbContext _dbContext;
 
         public MainWindow() : base("Система управления поликлиникой")
         {
@@ -24,20 +26,11 @@ namespace DispensaryApp.UI
             DefaultHeight = 768;
             WindowPosition = WindowPosition.Center;
 
-            // Инициализация контекста базы данных
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var optionsBuilder = new DbContextOptionsBuilder<DispensaryDbContext>();
-            optionsBuilder.UseMySql(
-                configuration.GetConnectionString("DefaultConnection"),
-                new MySqlServerVersion(new Version(8, 0, 21))
-            );
-
-            _dbContext = new DispensaryDbContext(optionsBuilder.Options);
-            _dbContext.Database.EnsureCreated();
+            // Получаем сервисы из DI контейнера
+            var patientService = Program.ServiceProvider.GetRequiredService<PatientService>();
+            var doctorService = Program.ServiceProvider.GetRequiredService<DoctorService>();
+            var appointmentService = Program.ServiceProvider.GetRequiredService<AppointmentService>();
+            var reportService = Program.ServiceProvider.GetRequiredService<ReportService>();
 
             // Создаем контейнер с вкладками
             _notebook = new Notebook
@@ -49,10 +42,10 @@ namespace DispensaryApp.UI
             };
 
             // Создаем страницы
-            _appointmentsPage = new AppointmentsPage(_dbContext);
-            _patientsPage = new PatientsPage(_dbContext);
-            _doctorsPage = new DoctorsPage(_dbContext);
-            _reportsPage = new ReportsPage(_dbContext);
+            _appointmentsPage = new AppointmentsPage(appointmentService, patientService, doctorService);
+            _patientsPage = new PatientsPage(patientService);
+            _doctorsPage = new DoctorsPage(doctorService);
+            _reportsPage = new ReportsPage(reportService);
 
             // Добавляем страницы во вкладки
             _notebook.AppendPage(_appointmentsPage, new Label("Приемы"));
@@ -69,7 +62,6 @@ namespace DispensaryApp.UI
 
         private void OnDeleteEvent(object sender, DeleteEventArgs args)
         {
-            _dbContext.Dispose();
             Application.Quit();
         }
     }

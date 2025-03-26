@@ -3,20 +3,19 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using DispensaryApp.Core.Models;
 using DispensaryApp.Data;
+using DispensaryApp.Data.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DispensaryApp.Core.Services
 {
     public class DoctorService : IDataService<Doctor>
     {
-        private readonly DispensaryDbContext _context;
+        private readonly ILogger<DoctorService> _logger;
 
-        public DispensaryDbContext Context => _context;
-
-        public DoctorService(DispensaryDbContext context)
+        public DoctorService(ILogger<DoctorService> logger)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger;
         }
 
         public IEnumerable<Doctor> GetAllDoctors()
@@ -26,81 +25,54 @@ namespace DispensaryApp.Core.Services
 
         public async Task<IEnumerable<Doctor>> GetAllAsync()
         {
-            return await _context.Doctors
-                .Select(d => new Doctor
-                {
-                    Id = d.DoctorId,
-                    FirstName = d.FirstName,
-                    LastName = d.LastName,
-                    MiddleName = "",
-                    Specialization = d.Specialty,
-                    LicenseNumber = "",
-                    Phone = "",
-                    Email = "",
-                    Schedule = "",
-                    HireDate = DateTime.Now
-                })
-                .ToListAsync();
+            try
+            {
+                _logger.LogInformation("Начало загрузки врачей");
+                using var context = DispensaryDbContextFactory.CreateContext();
+                var doctors = await context.Doctors.ToListAsync();
+                _logger.LogInformation("Загружено {Count} врачей", doctors.Count);
+                return doctors;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке врачей");
+                throw;
+            }
         }
 
         public async Task<Doctor> GetByIdAsync(int id)
         {
-            var dbDoctor = await _context.Doctors.FindAsync(id);
-            if (dbDoctor == null)
-                return null;
-
-            return new Doctor
-            {
-                Id = dbDoctor.DoctorId,
-                FirstName = dbDoctor.FirstName,
-                LastName = dbDoctor.LastName,
-                MiddleName = "",
-                Specialization = dbDoctor.Specialty,
-                LicenseNumber = "",
-                Phone = "",
-                Email = "",
-                Schedule = "",
-                HireDate = DateTime.Now
-            };
+            using var context = DispensaryDbContextFactory.CreateContext();
+            var result = await context.Doctors.FindAsync(id);
+            if (result == null)
+                throw new KeyNotFoundException($"Врач с ID {id} не найден");
+            return result;
         }
 
         public async Task<Doctor> AddAsync(Doctor doctor)
         {
-            var dbDoctor = new Data.Models.Doctor
-            {
-                FirstName = doctor.FirstName,
-                LastName = doctor.LastName,
-                Specialty = doctor.Specialization
-            };
-
-            _context.Doctors.Add(dbDoctor);
-            await _context.SaveChangesAsync();
-
-            doctor.Id = dbDoctor.DoctorId;
-            return doctor;
+            using var context = DispensaryDbContextFactory.CreateContext();
+            var result = await context.Doctors.AddAsync(doctor);
+            await context.SaveChangesAsync();
+            return result.Entity;
         }
 
         public async Task<Doctor> UpdateAsync(Doctor doctor)
         {
-            var dbDoctor = await _context.Doctors.FindAsync(doctor.Id);
-            if (dbDoctor == null)
-                throw new KeyNotFoundException($"Врач с ID {doctor.Id} не найден");
-
-            dbDoctor.FirstName = doctor.FirstName;
-            dbDoctor.LastName = doctor.LastName;
-            dbDoctor.Specialty = doctor.Specialization;
-
-            await _context.SaveChangesAsync();
-            return doctor;
+            using var context = DispensaryDbContextFactory.CreateContext();
+            var result = context.Doctors.Update(doctor);
+            await context.SaveChangesAsync();
+            return result.Entity;
         }
 
         public async Task DeleteAsync(int id)
         {
-            var doctor = await _context.Doctors.FindAsync(id);
+            using var context = DispensaryDbContextFactory.CreateContext();
+            var doctor = await context.Doctors.FindAsync(id);
             if (doctor != null)
             {
-                _context.Doctors.Remove(doctor);
-                await _context.SaveChangesAsync();
+                context.Doctors.Remove(doctor);
+                await context.SaveChangesAsync();
             }
         }
 

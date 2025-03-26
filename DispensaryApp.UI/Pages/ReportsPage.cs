@@ -1,168 +1,157 @@
 using Gtk;
 using System;
 using System.Collections.Generic;
-using DispensaryApp.Core.Models;
+using System.Threading.Tasks;
 using DispensaryApp.Core.Services;
+using DispensaryApp.Data.Models;
+using DispensaryApp.UI.Dialogs;
 using DispensaryApp.UI.Styles;
-using DispensaryApp.Data;
+using GLib;
 
 namespace DispensaryApp.UI.Pages
 {
     public class ReportsPage : Box
     {
-        private readonly ReportService _reportService;
+        private readonly ListStore _listStore;
         private readonly TreeView _treeView;
-        private readonly ListStore _store;
-        private readonly Button _generateButton;
-        private readonly Button _exportButton;
-        private readonly ComboBox _reportTypeComboBox;
-        private readonly ScrolledWindow _scrolledWindow;
+        private readonly ReportService _reportService;
 
-        public ReportsPage(DispensaryDbContext context) : base(Orientation.Vertical, 0)
+        public ReportsPage(ReportService reportService) : base(Orientation.Vertical, 5)
         {
-            _reportService = new ReportService(context);
-            
-            // Панель инструментов
-            var toolbar = new Box(Orientation.Horizontal, 6) { MarginStart = 6, MarginEnd = 6, MarginTop = 6, MarginBottom = 6 };
-            
-            _reportTypeComboBox = new ComboBox(new string[] { "Приемы", "Пациенты", "Врачи", "Доход" });
-            _generateButton = new Button("Сформировать");
-            _exportButton = new Button("Экспорт");
-            
-            StyleManager.ApplyButtonStyle(_generateButton);
-            StyleManager.ApplyButtonStyle(_exportButton);
-            
-            toolbar.PackStart(new Label("Тип отчета:"), false, false, 0);
-            toolbar.PackStart(_reportTypeComboBox, false, false, 0);
-            toolbar.PackStart(_generateButton, false, false, 0);
-            toolbar.PackStart(_exportButton, false, false, 0);
-            toolbar.PackEnd(new Label(""), true, true, 0);
-            
-            PackStart(toolbar, false, false, 0);
+            _reportService = reportService;
 
-            // Таблица отчета
-            _store = new ListStore(typeof(string), typeof(string));
-            
-            _treeView = new TreeView(_store)
+            // Создаем модель данных
+            _listStore = new ListStore(
+                typeof(int),    // ID
+                typeof(string), // Дата
+                typeof(string), // Время
+                typeof(string), // Пациент
+                typeof(string), // Врач
+                typeof(string), // Причина
+                typeof(string)  // Статус
+            );
+
+            // Создаем представление
+            _treeView = new TreeView(_listStore)
             {
                 HeadersVisible = true,
                 Reorderable = true
             };
-            
-            foreach (var column in _treeView.Columns)
+
+            // Добавляем колонки
+            _treeView.AppendColumn("ID", new CellRendererText(), "text", 0);
+            _treeView.AppendColumn("Дата", new CellRendererText(), "text", 1);
+            _treeView.AppendColumn("Время", new CellRendererText(), "text", 2);
+            _treeView.AppendColumn("Пациент", new CellRendererText(), "text", 3);
+            _treeView.AppendColumn("Врач", new CellRendererText(), "text", 4);
+            _treeView.AppendColumn("Причина", new CellRendererText(), "text", 5);
+            _treeView.AppendColumn("Статус", new CellRendererText(), "text", 6);
+
+            // Создаем кнопки
+            var buttonBox = new Box(Orientation.Horizontal, 5);
+            var generateButton = new Button("Сгенерировать отчет");
+            var exportButton = new Button("Экспорт");
+
+            buttonBox.PackStart(generateButton, true, true, 5);
+            buttonBox.PackStart(exportButton, true, true, 5);
+
+            // Подключаем обработчики
+            generateButton.Clicked += OnGenerateClicked;
+            exportButton.Clicked += OnExportClicked;
+
+            // Создаем скролл для таблицы
+            var scrollWindow = new ScrolledWindow
             {
-                column.Resizable = true;
-                column.Clickable = true;
-            }
-            
-            StyleManager.ApplyTreeViewStyle(_treeView);
-            
-            _treeView.AppendColumn("Параметр", new CellRendererText(), "text", 0);
-            _treeView.AppendColumn("Значение", new CellRendererText(), "text", 1);
-            
-            _scrolledWindow = new ScrolledWindow
-            {
-                Child = _treeView,
-                ShadowType = ShadowType.In
+                ShadowType = ShadowType.In,
+                HscrollbarPolicy = PolicyType.Automatic,
+                VscrollbarPolicy = PolicyType.Automatic
             };
-            
-            PackStart(_scrolledWindow, true, true, 0);
+            scrollWindow.Add(_treeView);
 
-            // Подключаем обработчики событий
-            _generateButton.Clicked += OnGenerateButtonClicked;
-            _exportButton.Clicked += OnExportButtonClicked;
+            // Добавляем элементы на страницу
+            PackStart(buttonBox, false, false, 5);
+            PackStart(scrollWindow, true, true, 5);
 
-            // Устанавливаем начальное значение
-            _reportTypeComboBox.Active = 0;
+            // Загружаем данные
+            _ = LoadDataAsync();
         }
 
-        private void OnGenerateButtonClicked(object? sender, EventArgs e)
+        private async System.Threading.Tasks.Task LoadDataAsync()
         {
             try
             {
-                _store.Clear();
-                string report = _reportTypeComboBox.Active switch
+                _listStore.Clear();
+                var appointments = await _reportService.GetAppointmentsAsync();
+                foreach (var appointment in appointments)
                 {
-                    0 => _reportService.GenerateAppointmentsReport(),
-                    1 => _reportService.GeneratePatientsReport(),
-                    2 => _reportService.GenerateDoctorsReport(),
-                    3 => _reportService.GenerateIncomeReport(),
-                    _ => throw new ArgumentException("Неизвестный тип отчета")
-                };
-
-                var lines = report.Split('\n');
-                foreach (var line in lines)
-                {
-                    if (string.IsNullOrWhiteSpace(line)) continue;
-                    
-                    var parts = line.Split(':', 2);
-                    if (parts.Length == 2)
-                    {
-                        _store.AppendValues(parts[0].Trim(), parts[1].Trim());
-                    }
-                    else
-                    {
-                        _store.AppendValues(line.Trim(), "");
-                    }
+                    _listStore.AppendValues(
+                        appointment.Id,
+                        appointment.AppointmentDate.ToString("dd.MM.yyyy"),
+                        appointment.AppointmentDate.ToString("HH:mm"),
+                        $"{appointment.Patient.LastName} {appointment.Patient.FirstName}",
+                        $"{appointment.Doctor.LastName} {appointment.Doctor.FirstName}",
+                        appointment.Reason,
+                        appointment.Status.ToString()
+                    );
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage("Ошибка", $"Не удалось сформировать отчет: {ex.Message}", MessageType.Error);
+                var dialog = new MessageDialog(
+                    this.Toplevel as Window,
+                    DialogFlags.Modal,
+                    MessageType.Error,
+                    ButtonsType.Ok,
+                    $"Ошибка при загрузке данных: {ex.Message}"
+                );
+                dialog.Run();
+                dialog.Destroy();
             }
         }
 
-        private void OnExportButtonClicked(object? sender, EventArgs e)
+        private async void OnGenerateClicked(object? sender, EventArgs e)
+        {
+            var dialog = new ReportDialog(this.Toplevel as Window);
+            if (dialog.Run() == (int)ResponseType.Accept)
+            {
+                await LoadDataAsync();
+            }
+            dialog.Destroy();
+        }
+
+        private async void OnExportClicked(object? sender, EventArgs e)
         {
             try
             {
-                var dialog = new FileChooserDialog(
-                    "Сохранить отчет",
-                    Toplevel as Window,
-                    FileChooserAction.Save,
-                    "Отмена", ResponseType.Cancel,
-                    "Сохранить", ResponseType.Accept
+                await _reportService.ExportToExcelAsync();
+                var dialog = new MessageDialog(
+                    this.Toplevel as Window,
+                    DialogFlags.Modal,
+                    MessageType.Info,
+                    ButtonsType.Ok,
+                    "Отчет успешно экспортирован"
                 );
-
-                dialog.Filter = new FileFilter { Name = "Текстовые файлы" };
-                dialog.Filter.AddPattern("*.txt");
-
-                if (dialog.Run() == (int)ResponseType.Accept)
-                {
-                    var filename = dialog.Filename;
-                    if (!filename.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
-                    {
-                        filename += ".txt";
-                    }
-
-                    var report = _reportTypeComboBox.Active switch
-                    {
-                        0 => _reportService.GenerateAppointmentsReport(),
-                        1 => _reportService.GeneratePatientsReport(),
-                        2 => _reportService.GenerateDoctorsReport(),
-                        3 => _reportService.GenerateIncomeReport(),
-                        _ => throw new ArgumentException("Неизвестный тип отчета")
-                    };
-
-                    System.IO.File.WriteAllText(filename, report);
-                    ShowMessage("Успех", "Отчет успешно сохранен", MessageType.Info);
-                }
+                dialog.Run();
                 dialog.Destroy();
             }
             catch (Exception ex)
             {
-                ShowMessage("Ошибка", $"Не удалось экспортировать отчет: {ex.Message}", MessageType.Error);
+                var dialog = new MessageDialog(
+                    this.Toplevel as Window,
+                    DialogFlags.Modal,
+                    MessageType.Error,
+                    ButtonsType.Ok,
+                    $"Ошибка при экспорте отчета: {ex.Message}"
+                );
+                dialog.Run();
+                dialog.Destroy();
             }
         }
 
-        private void ShowMessage(string title, string message, MessageType type)
+        public new void Show()
         {
-            var dialog = new MessageDialog(Toplevel as Window, DialogFlags.Modal, type, ButtonsType.Ok, message)
-            {
-                Title = title
-            };
-            dialog.Run();
-            dialog.Destroy();
+            base.Show();
+            _ = LoadDataAsync();
         }
     }
 } 

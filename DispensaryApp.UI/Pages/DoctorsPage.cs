@@ -1,203 +1,175 @@
 using Gtk;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using DispensaryApp.Core.Models;
 using DispensaryApp.Core.Services;
+using DispensaryApp.Data.Models;
 using DispensaryApp.UI.Dialogs;
 using DispensaryApp.UI.Styles;
-using DispensaryApp.Data;
+using GLib;
 
 namespace DispensaryApp.UI.Pages
 {
     public class DoctorsPage : Box
     {
-        private readonly DoctorService _doctorService;
+        private readonly ListStore _listStore;
         private readonly TreeView _treeView;
-        private readonly ListStore _store;
-        private readonly Button _addButton;
-        private readonly Button _editButton;
-        private readonly Button _deleteButton;
-        private readonly ScrolledWindow _scrolledWindow;
+        private readonly DoctorService _doctorService;
 
-        public DoctorsPage(DispensaryDbContext context) : base(Orientation.Vertical, 0)
+        public DoctorsPage(DoctorService doctorService) : base(Orientation.Vertical, 5)
         {
-            _doctorService = new DoctorService(context);
-            
-            // Панель инструментов
-            var hbox = new Box(Orientation.Horizontal, 6) { MarginStart = 6, MarginEnd = 6, MarginTop = 6, MarginBottom = 6 };
-            
-            _addButton = new Button("Добавить");
-            _editButton = new Button("Редактировать");
-            _deleteButton = new Button("Удалить");
-            
-            StyleManager.ApplyButtonStyle(_addButton);
-            StyleManager.ApplyButtonStyle(_editButton);
-            StyleManager.ApplyButtonStyle(_deleteButton);
-            
-            hbox.PackStart(_addButton, false, false, 0);
-            hbox.PackStart(_editButton, false, false, 0);
-            hbox.PackStart(_deleteButton, false, false, 0);
-            hbox.PackEnd(new Label(""), true, true, 0);
-            
-            PackStart(hbox, false, false, 0);
+            _doctorService = doctorService;
 
-            // Таблица врачей
-            _store = new ListStore(typeof(int), typeof(string), typeof(string), typeof(string), 
-                                 typeof(string), typeof(string), typeof(string), typeof(string), 
-                                 typeof(string), typeof(string));
-            
-            _treeView = new TreeView(_store)
+            // Создаем модель данных
+            _listStore = new ListStore(
+                typeof(int),    // ID
+                typeof(string), // Фамилия
+                typeof(string), // Имя
+                typeof(string), // Отчество
+                typeof(string), // Специальность
+                typeof(string), // Специализация
+                typeof(string), // Номер лицензии
+                typeof(string), // Телефон
+                typeof(string)  // Email
+            );
+
+            // Создаем представление
+            _treeView = new TreeView(_listStore)
             {
                 HeadersVisible = true,
                 Reorderable = true
             };
-            
-            foreach (var column in _treeView.Columns)
-            {
-                column.Resizable = true;
-                column.Clickable = true;
-            }
-            
-            StyleManager.ApplyTreeViewStyle(_treeView);
-            
+
+            // Добавляем колонки
             _treeView.AppendColumn("ID", new CellRendererText(), "text", 0);
             _treeView.AppendColumn("Фамилия", new CellRendererText(), "text", 1);
             _treeView.AppendColumn("Имя", new CellRendererText(), "text", 2);
             _treeView.AppendColumn("Отчество", new CellRendererText(), "text", 3);
-            _treeView.AppendColumn("Специализация", new CellRendererText(), "text", 4);
-            _treeView.AppendColumn("Лицензия", new CellRendererText(), "text", 5);
-            _treeView.AppendColumn("Телефон", new CellRendererText(), "text", 6);
-            _treeView.AppendColumn("Email", new CellRendererText(), "text", 7);
-            _treeView.AppendColumn("График", new CellRendererText(), "text", 8);
-            _treeView.AppendColumn("Дата найма", new CellRendererText(), "text", 9);
-            
-            _scrolledWindow = new ScrolledWindow
-            {
-                Child = _treeView,
-                ShadowType = ShadowType.In
-            };
-            
-            PackStart(_scrolledWindow, true, true, 0);
+            _treeView.AppendColumn("Специальность", new CellRendererText(), "text", 4);
+            _treeView.AppendColumn("Специализация", new CellRendererText(), "text", 5);
+            _treeView.AppendColumn("Номер лицензии", new CellRendererText(), "text", 6);
+            _treeView.AppendColumn("Телефон", new CellRendererText(), "text", 7);
+            _treeView.AppendColumn("Email", new CellRendererText(), "text", 8);
 
-            // Подключаем обработчики событий
-            _addButton.Clicked += OnAddButtonClicked;
-            _editButton.Clicked += OnEditButtonClicked;
-            _deleteButton.Clicked += OnDeleteButtonClicked;
+            // Создаем кнопки
+            var buttonBox = new Box(Orientation.Horizontal, 5);
+            var addButton = new Button("Добавить");
+            var editButton = new Button("Редактировать");
+            var deleteButton = new Button("Удалить");
+
+            buttonBox.PackStart(addButton, true, true, 5);
+            buttonBox.PackStart(editButton, true, true, 5);
+            buttonBox.PackStart(deleteButton, true, true, 5);
+
+            // Подключаем обработчики
+            addButton.Clicked += OnAddClicked;
+            editButton.Clicked += OnEditClicked;
+            deleteButton.Clicked += OnDeleteClicked;
+
+            // Создаем скролл для таблицы
+            var scrollWindow = new ScrolledWindow
+            {
+                ShadowType = ShadowType.In,
+                HscrollbarPolicy = PolicyType.Automatic,
+                VscrollbarPolicy = PolicyType.Automatic
+            };
+            scrollWindow.Add(_treeView);
+
+            // Добавляем элементы на страницу
+            PackStart(buttonBox, false, false, 5);
+            PackStart(scrollWindow, true, true, 5);
 
             // Загружаем данные
-            LoadDoctors();
+            _ = LoadDataAsync();
         }
 
-        private async void LoadDoctors()
+        private async System.Threading.Tasks.Task LoadDataAsync()
         {
             try
             {
-                _store.Clear();
+                _listStore.Clear();
                 var doctors = await _doctorService.GetAllAsync();
-                
                 foreach (var doctor in doctors)
                 {
-                    _store.AppendValues(
+                    _listStore.AppendValues(
                         doctor.Id,
                         doctor.LastName,
                         doctor.FirstName,
                         doctor.MiddleName,
+                        doctor.Specialty,
                         doctor.Specialization,
                         doctor.LicenseNumber,
                         doctor.Phone,
-                        doctor.Email,
-                        doctor.Schedule,
-                        doctor.HireDate.ToString("dd.MM.yyyy")
+                        doctor.Email
                     );
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage("Ошибка", $"Не удалось загрузить список врачей: {ex.Message}", MessageType.Error);
+                var dialog = new MessageDialog(
+                    this.Toplevel as Window,
+                    DialogFlags.Modal,
+                    MessageType.Error,
+                    ButtonsType.Ok,
+                    $"Ошибка при загрузке данных: {ex.Message}"
+                );
+                dialog.Run();
+                dialog.Destroy();
             }
         }
 
-        private async void OnAddButtonClicked(object? sender, EventArgs e)
+        private async void OnAddClicked(object? sender, EventArgs e)
         {
-            if (Toplevel is Window parent)
+            var dialog = new DoctorDialog(this.Toplevel as Window);
+            if (dialog.Run() == (int)ResponseType.Accept)
             {
-                var dialog = new DoctorDialog(parent, _doctorService.Context);
+                await LoadDataAsync();
+            }
+            dialog.Destroy();
+        }
+
+        private async void OnEditClicked(object? sender, EventArgs e)
+        {
+            var selection = _treeView.Selection;
+            if (selection.GetSelected(out TreeIter iter))
+            {
+                var id = (int)_listStore.GetValue(iter, 0);
+                var doctor = await _doctorService.GetByIdAsync(id);
+                var dialog = new DoctorDialog(this.Toplevel as Window, doctor);
                 if (dialog.Run() == (int)ResponseType.Accept)
                 {
-                    await Task.Run(() => LoadDoctors());
+                    await LoadDataAsync();
                 }
                 dialog.Destroy();
             }
         }
 
-        private async void OnEditButtonClicked(object? sender, EventArgs e)
+        private async void OnDeleteClicked(object? sender, EventArgs e)
         {
-            if (_treeView.Selection.GetSelected(out TreeIter iter))
+            var selection = _treeView.Selection;
+            if (selection.GetSelected(out TreeIter iter))
             {
-                var id = (int)_store.GetValue(iter, 0);
-                var doctor = await _doctorService.GetByIdAsync(id);
-                
-                if (doctor != null)
+                var id = (int)_listStore.GetValue(iter, 0);
+                var dialog = new MessageDialog(
+                    this.Toplevel as Window,
+                    DialogFlags.Modal,
+                    MessageType.Question,
+                    ButtonsType.YesNo,
+                    "Вы уверены, что хотите удалить этого врача?"
+                );
+                if (dialog.Run() == (int)ResponseType.Yes)
                 {
-                    if (Toplevel is Window parent)
-                    {
-                        var dialog = new DoctorDialog(parent, _doctorService.Context, doctor);
-                        if (dialog.Run() == (int)ResponseType.Accept)
-                        {
-                            await Task.Run(() => LoadDoctors());
-                        }
-                        dialog.Destroy();
-                    }
+                    await _doctorService.DeleteAsync(id);
+                    await LoadDataAsync();
                 }
-            }
-            else
-            {
-                ShowMessage("Предупреждение", "Выберите врача для редактирования", MessageType.Warning);
+                dialog.Destroy();
             }
         }
 
-        private async void OnDeleteButtonClicked(object? sender, EventArgs e)
+        public new void Show()
         {
-            if (_treeView.Selection.GetSelected(out TreeIter iter))
-            {
-                var id = (int)_store.GetValue(iter, 0);
-                var doctor = await _doctorService.GetByIdAsync(id);
-                
-                if (doctor != null)
-                {
-                    var dialog = new MessageDialog(
-                        Toplevel as Window,
-                        DialogFlags.Modal,
-                        MessageType.Question,
-                        ButtonsType.YesNo,
-                        "Вы уверены, что хотите удалить врача {0} {1} {2}?",
-                        doctor.LastName,
-                        doctor.FirstName,
-                        doctor.MiddleName
-                    );
-
-                    if (dialog.Run() == (int)ResponseType.Yes)
-                    {
-                        await _doctorService.DeleteAsync(id);
-                        await Task.Run(() => LoadDoctors());
-                    }
-                    dialog.Destroy();
-                }
-            }
-            else
-            {
-                ShowMessage("Предупреждение", "Выберите врача для удаления", MessageType.Warning);
-            }
-        }
-
-        private void ShowMessage(string title, string message, MessageType type)
-        {
-            var dialog = new MessageDialog(Toplevel as Window, DialogFlags.Modal, type, ButtonsType.Ok, message)
-            {
-                Title = title
-            };
-            dialog.Run();
-            dialog.Destroy();
+            base.Show();
+            _ = LoadDataAsync();
         }
     }
 } 

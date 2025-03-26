@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using DispensaryApp.Core.Models;
 using DispensaryApp.Data;
+using DispensaryApp.Data.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DispensaryApp.Core.Services
 {
     public class PatientService : IDataService<Patient>
     {
-        private readonly DispensaryDbContext _context;
+        private readonly ILogger<PatientService> _logger;
 
-        public DispensaryDbContext Context => _context;
-
-        public PatientService(DispensaryDbContext context)
+        public PatientService(ILogger<PatientService> logger)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger;
+            _logger.LogInformation("PatientService создан");
         }
 
         public IEnumerable<Patient> GetAllPatients()
@@ -26,80 +26,117 @@ namespace DispensaryApp.Core.Services
 
         public async Task<IEnumerable<Patient>> GetAllAsync()
         {
-            return await _context.Patients
-                .Select(p => new Patient
+            try
+            {
+                _logger.LogInformation("Начало загрузки пациентов");
+                using var context = DispensaryDbContextFactory.CreateContext();
+                _logger.LogInformation("Контекст базы данных создан");
+
+                var patients = await context.Patients.ToListAsync();
+                if (patients == null)
                 {
-                    Id = p.PatientId,
-                    FirstName = p.FirstName,
-                    LastName = p.LastName,
-                    MiddleName = "",
-                    InsurancePolicy = "",
-                    Phone = "",
-                    Email = "",
-                    Address = "",
-                    BirthDate = p.DateOfBirth
-                })
-                .ToListAsync();
+                    _logger.LogWarning("Список пациентов равен null");
+                    return new List<Patient>();
+                }
+
+                _logger.LogInformation("Загружено {Count} пациентов", patients.Count);
+                foreach (var patient in patients)
+                {
+                    _logger.LogDebug("Загружен пациент: ID={Id}, ФИО={LastName} {FirstName} {MiddleName}",
+                        patient.Id, patient.LastName, patient.FirstName, patient.MiddleName);
+                }
+                return patients;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при загрузке пациентов: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<Patient> GetByIdAsync(int id)
         {
-            var dbPatient = await _context.Patients.FindAsync(id);
-            if (dbPatient == null)
-                return null;
-
-            return new Patient
+            try
             {
-                Id = dbPatient.PatientId,
-                FirstName = dbPatient.FirstName,
-                LastName = dbPatient.LastName,
-                MiddleName = "",
-                InsurancePolicy = "",
-                Phone = "",
-                Email = "",
-                Address = "",
-                BirthDate = dbPatient.DateOfBirth
-            };
+                _logger.LogInformation("Поиск пациента по ID={Id}", id);
+                using var context = DispensaryDbContextFactory.CreateContext();
+                var result = await context.Patients.FindAsync(id);
+                if (result == null)
+                {
+                    _logger.LogWarning("Пациент с ID={Id} не найден", id);
+                    throw new KeyNotFoundException($"Пациент с ID {id} не найден");
+                }
+                _logger.LogInformation("Найден пациент: ID={Id}, ФИО={LastName} {FirstName} {MiddleName}",
+                    result.Id, result.LastName, result.FirstName, result.MiddleName);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при поиске пациента по ID={Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<Patient> AddAsync(Patient patient)
         {
-            var dbPatient = new Data.Models.Patient
+            try
             {
-                FirstName = patient.FirstName,
-                LastName = patient.LastName,
-                DateOfBirth = patient.BirthDate,
-                Gender = "Не указан"
-            };
-
-            _context.Patients.Add(dbPatient);
-            await _context.SaveChangesAsync();
-
-            patient.Id = dbPatient.PatientId;
-            return patient;
+                _logger.LogInformation("Добавление нового пациента: ФИО={LastName} {FirstName} {MiddleName}",
+                    patient.LastName, patient.FirstName, patient.MiddleName);
+                using var context = DispensaryDbContextFactory.CreateContext();
+                var result = await context.Patients.AddAsync(patient);
+                await context.SaveChangesAsync();
+                _logger.LogInformation("Пациент успешно добавлен с ID={Id}", result.Entity.Id);
+                return result.Entity;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при добавлении пациента: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task<Patient> UpdateAsync(Patient patient)
         {
-            var dbPatient = await _context.Patients.FindAsync(patient.Id);
-            if (dbPatient == null)
-                throw new KeyNotFoundException($"Пациент с ID {patient.Id} не найден");
-
-            dbPatient.FirstName = patient.FirstName;
-            dbPatient.LastName = patient.LastName;
-            dbPatient.DateOfBirth = patient.BirthDate;
-
-            await _context.SaveChangesAsync();
-            return patient;
+            try
+            {
+                _logger.LogInformation("Обновление пациента: ID={Id}, ФИО={LastName} {FirstName} {MiddleName}",
+                    patient.Id, patient.LastName, patient.FirstName, patient.MiddleName);
+                using var context = DispensaryDbContextFactory.CreateContext();
+                var result = context.Patients.Update(patient);
+                await context.SaveChangesAsync();
+                _logger.LogInformation("Пациент успешно обновлен");
+                return result.Entity;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при обновлении пациента: {Message}", ex.Message);
+                throw;
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
-            var patient = await _context.Patients.FindAsync(id);
-            if (patient != null)
+            try
             {
-                _context.Patients.Remove(patient);
-                await _context.SaveChangesAsync();
+                _logger.LogInformation("Удаление пациента с ID={Id}", id);
+                using var context = DispensaryDbContextFactory.CreateContext();
+                var patient = await context.Patients.FindAsync(id);
+                if (patient != null)
+                {
+                    context.Patients.Remove(patient);
+                    await context.SaveChangesAsync();
+                    _logger.LogInformation("Пациент успешно удален");
+                }
+                else
+                {
+                    _logger.LogWarning("Пациент с ID={Id} не найден для удаления", id);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при удалении пациента: {Message}", ex.Message);
+                throw;
             }
         }
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DispensaryApp.Security")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d3812f48e922e1f88d50998aabf04f28dc00ec93")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8810b730e7e321e03148bdbf1970792dbe121ceb")]
 [assembly: System.Reflection.AssemblyProductAttribute("DispensaryApp.Security")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DispensaryApp.Security")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
