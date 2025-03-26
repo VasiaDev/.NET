@@ -26,53 +26,47 @@ namespace DispensaryApp.UI
                 Application.Init();
                 StyleManager.Initialize();
                 
-                // Проверяем наличие файла конфигурации
                 var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
                 if (!File.Exists(configPath))
                 {
                     throw new FileNotFoundException("Файл конфигурации appsettings.json не найден");
                 }
 
-                // Настройка конфигурации
                 var configuration = new ConfigurationBuilder()
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                     .Build();
 
-                // Инициализируем фабрику контекста базы данных
                 DispensaryDbContextFactory.Initialize(configuration);
 
-                // Настройка сервисов
                 var services = new ServiceCollection();
                 ConfigureServices(services, configuration);
                 ServiceProvider = services.BuildServiceProvider();
 
-                // Проверяем подключение к базе данных и создаем её, если не существует
                 using (var scope = ServiceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<DispensaryDbContext>();
                     try
                     {
-                        // Создаем базу данных и применяем миграции
-                        dbContext.Database.EnsureCreated();
-                        Console.WriteLine("База данных успешно создана или уже существует");
+                        Console.WriteLine("Применение миграций базы данных...");
+                        dbContext.Database.Migrate();
+                        Console.WriteLine("Миграции успешно применены");
                         
-                        // Инициализируем тестовые данные
                         DbInitializer.Initialize(dbContext);
                         Console.WriteLine("Тестовые данные успешно добавлены");
                         
-                        // Проверяем подключение
                         dbContext.Database.OpenConnection();
                         Console.WriteLine("Подключение к базе данных успешно установлено");
                         dbContext.Database.CloseConnection();
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception($"Ошибка при работе с базой данных: {ex.Message}");
+                        Console.WriteLine($"Ошибка при работе с базой данных: {ex.Message}");
+                        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                        throw;
                     }
                 }
 
-                // Создание и запуск главного окна
                 var window = new MainWindow();
                 window.ShowAll();
                 
@@ -83,7 +77,6 @@ namespace DispensaryApp.UI
                 Console.WriteLine($"Критическая ошибка: {ex.Message}");
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 
-                // Показываем диалог с ошибкой
                 var dialog = new MessageDialog(
                     null,
                     DialogFlags.Modal,
@@ -106,14 +99,12 @@ namespace DispensaryApp.UI
                 throw new ArgumentNullException(nameof(connectionString), "Строка подключения к базе данных не найдена в конфигурации");
             }
 
-            // Добавляем логирование
             services.AddLogging(builder =>
             {
                 builder.AddConsole();
                 builder.AddDebug();
             });
 
-            // Добавляем контекст базы данных
             services.AddDbContext<DispensaryDbContext>(options =>
                 options.UseMySql(
                     connectionString,
@@ -121,7 +112,6 @@ namespace DispensaryApp.UI
                     mySqlOptions => mySqlOptions.EnableRetryOnFailure()
                 ));
 
-            // Регистрируем сервисы
             services.AddScoped<PatientService>();
             services.AddScoped<DoctorService>();
             services.AddScoped<AppointmentService>();

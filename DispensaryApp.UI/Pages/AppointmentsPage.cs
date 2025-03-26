@@ -25,25 +25,22 @@ namespace DispensaryApp.UI.Pages
             _patientService = patientService;
             _doctorService = doctorService;
 
-            // Создаем модель данных
             _listStore = new ListStore(
-                typeof(int),    // ID
-                typeof(string), // Дата
-                typeof(string), // Время
-                typeof(string), // Пациент
-                typeof(string), // Врач
-                typeof(string), // Причина
-                typeof(string)  // Статус
+                typeof(int),    
+                typeof(string), 
+                typeof(string), 
+                typeof(string), 
+                typeof(string), 
+                typeof(string), 
+                typeof(string)  
             );
 
-            // Создаем представление
             _treeView = new TreeView(_listStore)
             {
                 HeadersVisible = true,
                 Reorderable = true
             };
 
-            // Добавляем колонки
             _treeView.AppendColumn("ID", new CellRendererText(), "text", 0);
             _treeView.AppendColumn("Дата", new CellRendererText(), "text", 1);
             _treeView.AppendColumn("Время", new CellRendererText(), "text", 2);
@@ -52,7 +49,6 @@ namespace DispensaryApp.UI.Pages
             _treeView.AppendColumn("Причина", new CellRendererText(), "text", 5);
             _treeView.AppendColumn("Статус", new CellRendererText(), "text", 6);
 
-            // Создаем кнопки
             var buttonBox = new Box(Orientation.Horizontal, 5);
             var addButton = new Button("Добавить");
             var editButton = new Button("Редактировать");
@@ -64,13 +60,11 @@ namespace DispensaryApp.UI.Pages
             buttonBox.PackStart(deleteButton, true, true, 5);
             buttonBox.PackStart(cancelButton, true, true, 5);
 
-            // Подключаем обработчики
             addButton.Clicked += OnAddClicked;
             editButton.Clicked += OnEditClicked;
             deleteButton.Clicked += OnDeleteClicked;
             cancelButton.Clicked += OnCancelClicked;
 
-            // Создаем скролл для таблицы
             var scrollWindow = new ScrolledWindow
             {
                 ShadowType = ShadowType.In,
@@ -79,11 +73,9 @@ namespace DispensaryApp.UI.Pages
             };
             scrollWindow.Add(_treeView);
 
-            // Добавляем элементы на страницу
             PackStart(buttonBox, false, false, 5);
             PackStart(scrollWindow, true, true, 5);
 
-            // Загружаем данные
             _ = LoadDataAsync();
         }
 
@@ -152,19 +144,21 @@ namespace DispensaryApp.UI.Pages
             if (selection.GetSelected(out TreeIter iter))
             {
                 var id = (int)_listStore.GetValue(iter, 0);
-                var dialog = new MessageDialog(
+                var confirmDialog = new MessageDialog(
                     this.Toplevel as Window,
                     DialogFlags.Modal,
                     MessageType.Question,
                     ButtonsType.YesNo,
                     "Вы уверены, что хотите удалить эту запись?"
                 );
-                if (dialog.Run() == (int)ResponseType.Yes)
+
+                if (confirmDialog.Run() == (int)ResponseType.Yes)
                 {
                     await _appointmentService.DeleteAsync(id);
                     await LoadDataAsync();
                 }
-                dialog.Destroy();
+
+                confirmDialog.Destroy();
             }
         }
 
@@ -174,10 +168,21 @@ namespace DispensaryApp.UI.Pages
             if (selection.GetSelected(out TreeIter iter))
             {
                 var id = (int)_listStore.GetValue(iter, 0);
-                var appointment = await _appointmentService.GetByIdAsync(id);
-                appointment.Status = AppointmentStatus.Cancelled;
-                await _appointmentService.UpdateAsync(appointment);
-                await LoadDataAsync();
+                var confirmDialog = new MessageDialog(
+                    this.Toplevel as Window,
+                    DialogFlags.Modal,
+                    MessageType.Question,
+                    ButtonsType.YesNo,
+                    "Вы уверены, что хотите отменить этот прием?"
+                );
+
+                if (confirmDialog.Run() == (int)ResponseType.Yes)
+                {
+                    await _appointmentService.CancelAppointmentAsync(id);
+                    await LoadDataAsync();
+                }
+
+                confirmDialog.Destroy();
             }
         }
 

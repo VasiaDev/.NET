@@ -15,26 +15,18 @@ namespace DispensaryApp.Data.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int AppointmentId { get; set; }
+        public int Id { get; set; }
 
-        // Свойство Id для совместимости с интерфейсом
-        [NotMapped]
-        public int Id 
-        { 
-            get => AppointmentId;
-            set => AppointmentId = value;
-        }
-
-        [Required]
+        [Required(ErrorMessage = "Пациент не выбран")]
         public int PatientId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Врач не выбран")]
         public int DoctorId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Дата приема не указана")]
+        [DataType(DataType.DateTime)]
         public DateTime AppointmentDate { get; set; }
 
-        // Свойство Date для совместимости с существующим кодом
         [NotMapped]
         public DateTime Date
         {
@@ -42,7 +34,6 @@ namespace DispensaryApp.Data.Models
             set => AppointmentDate = value;
         }
 
-        // Свойство Time для совместимости с существующим кодом
         [NotMapped]
         public TimeSpan Time
         {
@@ -50,13 +41,13 @@ namespace DispensaryApp.Data.Models
             set => AppointmentDate = AppointmentDate.Date + value;
         }
 
-        [Required]
-        [StringLength(500)]
+        [Required(ErrorMessage = "Причина приема не указана")]
+        [StringLength(500, MinimumLength = 10, ErrorMessage = "Причина приема должна содержать от 10 до 500 символов")]
         public string Reason { get; set; } = "";
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [Required]
+        [Required(ErrorMessage = "Статус приема не указан")]
         public AppointmentStatus Status { get; set; } = AppointmentStatus.Scheduled;
 
         [ForeignKey("PatientId")]

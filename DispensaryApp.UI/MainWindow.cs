@@ -21,18 +21,15 @@ namespace DispensaryApp.UI
 
         public MainWindow() : base("Система управления поликлиникой")
         {
-            // Настройка окна
             DefaultWidth = 1024;
             DefaultHeight = 768;
             WindowPosition = WindowPosition.Center;
 
-            // Получаем сервисы из DI контейнера
             var patientService = Program.ServiceProvider.GetRequiredService<PatientService>();
             var doctorService = Program.ServiceProvider.GetRequiredService<DoctorService>();
             var appointmentService = Program.ServiceProvider.GetRequiredService<AppointmentService>();
             var reportService = Program.ServiceProvider.GetRequiredService<ReportService>();
 
-            // Создаем контейнер с вкладками
             _notebook = new Notebook
             {
                 Scrollable = true,
@@ -41,22 +38,18 @@ namespace DispensaryApp.UI
                 TabPos = PositionType.Top
             };
 
-            // Создаем страницы
             _appointmentsPage = new AppointmentsPage(appointmentService, patientService, doctorService);
             _patientsPage = new PatientsPage(patientService);
             _doctorsPage = new DoctorsPage(doctorService);
             _reportsPage = new ReportsPage(reportService);
 
-            // Добавляем страницы во вкладки
             _notebook.AppendPage(_appointmentsPage, new Label("Приемы"));
             _notebook.AppendPage(_patientsPage, new Label("Пациенты"));
             _notebook.AppendPage(_doctorsPage, new Label("Врачи"));
             _notebook.AppendPage(_reportsPage, new Label("Отчеты"));
 
-            // Добавляем контейнер в окно
             Add(_notebook);
 
-            // Подключаем обработчик закрытия окна
             DeleteEvent += OnDeleteEvent;
         }
 

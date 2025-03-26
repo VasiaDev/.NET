@@ -21,7 +21,7 @@ namespace DispensaryApp.Data.Migrations
 
             modelBuilder.Entity("DispensaryApp.Data.Models.Appointment", b =>
                 {
-                    b.Property<int>("AppointmentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -45,7 +45,7 @@ namespace DispensaryApp.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.HasKey("AppointmentId");
+                    b.HasKey("Id");
 
                     b.HasIndex("DoctorId");
 

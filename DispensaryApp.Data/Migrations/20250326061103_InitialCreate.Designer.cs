@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DispensaryApp.Data.Migrations
 {
     [DbContext(typeof(DispensaryDbContext))]
-    [Migration("20250325233612_InitialCreate")]
+    [Migration("20250326061103_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,7 +24,7 @@ namespace DispensaryApp.Data.Migrations
 
             modelBuilder.Entity("DispensaryApp.Data.Models.Appointment", b =>
                 {
-                    b.Property<int>("AppointmentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -48,7 +48,7 @@ namespace DispensaryApp.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.HasKey("AppointmentId");
+                    b.HasKey("Id");
 
                     b.HasIndex("DoctorId");
 
